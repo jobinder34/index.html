@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Mutch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Job Match Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Asap:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -49,6 +49,16 @@
   .onb-error-banner { display: flex; align-items: flex-start; gap: 8px; background: rgba(240,89,106,0.10); border: 1px solid var(--error); color: var(--error); font-size: 12.5px; font-weight: 600; padding: 12px 14px; margin: 0 24px 16px; border-radius: 12px; font-family: var(--font-body); line-height: 1.5; }
   .applicant-bulk-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
   .applicant-checkbox { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--highlight); cursor: pointer; }
+  .password-field-wrap { position: relative; }
+  .password-field-wrap input { padding-right: 44px !important; }
+  .password-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 10px; background: transparent; border: none; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .password-toggle .icon { width: 18px; height: 18px; }
+  .row-matched { border-left: 3px solid var(--highlight); }
+  .row-pending { border-left: 3px solid var(--border-strong); }
+  .row-avatar-pending { opacity: .75; filter: grayscale(0.4); }
+  .row-badge-matched { display: inline-flex; align-items: center; gap: 3px; background: var(--highlight-soft); color: var(--highlight); font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; padding: 2px 7px; border-radius: 999px; vertical-align: middle; }
+  .row-badge-matched .icon { width: 9px; height: 9px; }
+  .row-badge-pending { display: inline-block; background: var(--surface-3); color: var(--muted); font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; padding: 2px 7px; border-radius: 999px; vertical-align: middle; }
   .integration-list { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--surface-2); margin-bottom: 18px; }
   .integration-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
   .integration-row + .integration-row { border-top: 1px solid var(--border); }
@@ -138,7 +148,7 @@
   .icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: inline-block; vertical-align: -5px; }
   .icon-sm { width: 13px !important; height: 13px !important; vertical-align: -2px; margin-right: 2px; }
 
-  .app-header { display: flex; align-items: center; justify-content: space-between; padding: 44px 18px 12px; border-bottom: 1px solid var(--divider); flex-shrink: 0; }
+  .app-header { display: flex; align-items: center; justify-content: space-between; padding: calc(44px + env(safe-area-inset-top, 0px)) 18px 12px; border-bottom: 1px solid var(--divider); flex-shrink: 0; }
   .app-header.overlay-open { visibility: hidden; }
   .wordmark { display: flex; align-items: flex-end; gap: 2px; }
   .wordmark b { font-family: var(--font-display); font-weight: 700; font-size: 19px; color: #F7F8FA; line-height: 1; }
@@ -532,6 +542,11 @@
   .menu-item .icon { width: 18px; height: 18px; }
 
   footer.note { color: #6b7386; font-size: 11.5px; font-family: var(--font-body); text-align: center; max-width: 390px; }
+  @media (max-width: 520px) {
+    body { padding: 0; gap: 0; min-height: 100dvh; }
+    #phone { width: 100vw; height: 100dvh; max-width: 100%; max-height: 100%; border-radius: 0; box-shadow: none; }
+    #notch { display: none; }
+  }
 </style>
 </head>
 <body data-app="candidate">
@@ -582,6 +597,8 @@
 </div>
 
 <script>
+// MVP toggle — flip back to true to restore the brand name everywhere it was before.
+const MVP_SHOW_BRAND_NAME = false;
 /* ============================== ICONS ============================== */
 const ICONS = {
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/><path d="M10 19a2 2 0 0 0 4 0"/>',
@@ -623,6 +640,8 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   more: '<circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>',
   link: '<path d="M9 17H7a5 5 0 0 1 0-10h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-6.5 0-10-8-10-8a19.66 19.66 0 0 1 4.19-5.16"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 8 10 8a19.65 19.65 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>',
 };
@@ -3106,7 +3125,7 @@ const RECRUITER_JOBS = [
 ];
 
 const CANDIDATE_PROFILE = {
-  name:"Ana Torres", first_name:"Ana", last_name:"Torres", email:"ana@mutch.dev", phone:"+34 600 000 000", portfolio_link:"anatorres.dev",
+  name:"Ana Torres", first_name:"Ana", last_name:"Torres", email: MVP_SHOW_BRAND_NAME ? "ana@mutch.dev" : "ana@example.com", phone:"+34 600 000 000", portfolio_link:"anatorres.dev",
   headline:"Senior Frontend Engineer", location:"Madrid, Spain",
   bio:"I build accessible, fast interfaces. 6 years in React and design systems.",
   work_story:[
@@ -3120,8 +3139,8 @@ const CANDIDATE_PROFILE = {
   education:[
     { title:"BSc Computer Science", institution:"Universidad Politécnica de Madrid", grade:"", start:"2015-09", end:"2019-06" },
   ],
-  min_salary:"120,000 USD / yr (gross)", min_salary_amount:"120,000", min_salary_currency:"USD", work_setup:["Remote"], availability:"Immediately", availability_date:"", work_authorization:"No restrictions", years_experience:"6",
-  work_field:"Engineering", company_size_pref:"Scale-up (51-500)",
+  min_salary:"120,000 USD / yr (gross)", min_salary_amount:"120,000", min_salary_currency:"USD", work_setup:["Remote"], timezone_pref:"UTC+0 to UTC+2 (Europe/Africa)", availability:"Immediately", availability_date:"", work_authorization:"No restrictions", years_experience:"6",
+  work_field:"Engineering", company_size_pref:["Scale-up (51-500)"],
   skills:["React","TypeScript","Next.js","Design Systems"], languages:["English","Spanish"],
   language_levels:{"English":"Advanced","Spanish":"Native / Professional"},
   cultural_values:["Ownership","Async-first"],
@@ -3261,7 +3280,7 @@ function renderTabbar() {
 /* ============================== INTEGRATIONS ============================== */
 const INTEGRATION_TOOLS = [
   { id:'greenhouse', name:'Greenhouse', category:'ATS & recruiting', color:'#2ea15a', desc:'Sync job posts and candidate stages both ways.' },
-  { id:'lever', name:'Lever', category:'ATS & recruiting', color:'#5b6ee1', desc:'Push Mutch matches straight into your Lever pipeline.' },
+  { id:'lever', name:'Lever', category:'ATS & recruiting', color:'#5b6ee1', desc: (MVP_SHOW_BRAND_NAME ? 'Push Mutch matches straight into your Lever pipeline.' : 'Push matches straight into your Lever pipeline.') },
   { id:'workday', name:'Workday', category:'ATS & recruiting', color:'#f7a531', desc:'Keep requisitions and candidate records in sync.' },
   { id:'bamboohr', name:'BambooHR', category:'ATS & recruiting', color:'#6bb32d', desc:'Send new hires straight into onboarding.' },
   { id:'smartrecruiters', name:'SmartRecruiters', category:'ATS & recruiting', color:'#e0553f', desc:'Two-way sync for job posts and applicant stages.' },
@@ -3357,19 +3376,57 @@ function renderLogin() {
       <div class="carousel-track" id="carousel-track"></div>
       <div class="carousel-dots" id="carousel-dots"></div>
     </div>
-    <div class="field" style="margin-top:10px"><label>Email</label><input placeholder="Email" value="${isCandidate?'ana@mutch.dev':'talent@nebulalabs.dev'}" /></div>
+    <div class="field" style="margin-top:10px"><label>Email</label><input id="login-email" placeholder="you@email.com" /><div class="field-error" id="login-err-email"></div></div>
     <div class="field" style="margin-top:10px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
         <label style="margin:0">Password</label>
         <a href="#" style="font-size:11.5px;font-weight:600" onclick="event.preventDefault(); showToast('Password reset link sent (demo)')">Forgot password?</a>
       </div>
-      <input placeholder="Password" type="password" value="••••••••" />
+      ${passwordFieldHTML('login-password', 'Password')}
+      <div class="field-error" id="login-err-password"></div>
     </div>
-    <button class="btn btn-full" style="margin:10px 24px 0;width:calc(100% - 48px);background:#cc7777;border-color:#d99999" onclick="goTo('swipe')">Continue</button>
+    <button class="btn btn-full" style="margin:10px 24px 0;width:calc(100% - 48px);background:#cc7777;border-color:#d99999" onclick="attemptLogin()">Continue</button>
     <div class="divider-text" style="margin-top:26px;cursor:pointer" onclick="goTo('role-select')">Don't have an account yet?</div>
     <button class="btn btn-outline btn-full" style="margin:6px 24px 0;width:calc(100% - 48px)" onclick="goTo('role-select')">${icon('sparkle')} Create your free account</button>
     </div>`;
   initCarousel();
+}
+function togglePasswordVisibility(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.innerHTML = icon(showing ? 'eye' : 'eyeOff');
+}
+function passwordFieldHTML(id, placeholder, extraAttrs) {
+  return `<div class="password-field-wrap">
+    <input id="${id}" type="password" placeholder="${placeholder}" ${extraAttrs||''} />
+    <button type="button" class="password-toggle" id="${id}-toggle" onclick="togglePasswordVisibility('${id}','${id}-toggle')">${icon('eye')}</button>
+  </div>`;
+}
+function attemptLogin() {
+  const emailEl = document.getElementById('login-email');
+  const passEl = document.getElementById('login-password');
+  document.getElementById('login-err-email').textContent = '';
+  document.getElementById('login-err-password').textContent = '';
+  emailEl.closest('.field').classList.remove('has-error');
+  passEl.closest('.field').classList.remove('has-error');
+  const email = emailEl.value.trim();
+  const password = passEl.value;
+  if (!email) { document.getElementById('login-err-email').textContent = 'Enter your email'; emailEl.closest('.field').classList.add('has-error'); return; }
+  if (!password) { document.getElementById('login-err-password').textContent = 'Enter your password'; passEl.closest('.field').classList.add('has-error'); return; }
+  const account = findAccount(email, password);
+  if (!account) {
+    document.getElementById('login-err-password').textContent = "We couldn't find an account with that email and password. Create one first below.";
+    passEl.closest('.field').classList.add('has-error');
+    return;
+  }
+  app = account.role;
+  document.body.dataset.app = app;
+  if (account.role === 'candidate') Object.assign(CANDIDATE_PROFILE, account.profile);
+  else Object.assign(COMPANY_PROFILE, account.profile);
+  renderLogo();
+  goTo(account.role === 'candidate' ? 'swipe' : 'jobs');
 }
 function renderRoleSelect() {
   document.getElementById('screen-role-select').innerHTML = `
@@ -3447,7 +3504,7 @@ function renderSignup() {
     <div class="field"><label>Email <span class="required-mark">*</span></label><input id="su-email" placeholder="${isCandidate?'you@email.com':'you@yourcompany.com'}" oninput="signupData.email=this.value" /><div class="field-error" id="err-email"></div></div>
     ${!isCandidate ? `<div style="font-size:11px;color:var(--muted);margin:6px 24px 14px;line-height:1.5">${icon('shield','icon-sm')} We require a company email — no Gmail, Yahoo, Outlook, etc. — to keep candidates safe from fake employers.</div>` : ''}
     <div class="field"><label>Phone <span style="color:var(--muted);font-weight:400">(optional)</span></label><input type="tel" placeholder="+1 555 000 0000" oninput="signupData.phone=this.value" /></div>
-    <div class="field"><label>Password <span class="required-mark">*</span></label><input id="su-password" type="password" placeholder="At least 8 characters" oninput="signupData.password=this.value" /><div class="field-error" id="err-password"></div></div>
+    <div class="field"><label>Password <span class="required-mark">*</span></label>${passwordFieldHTML('su-password', 'At least 8 characters', 'oninput="signupData.password=this.value"')}<div class="field-error" id="err-password"></div></div>
     ${isCandidate
       ? `<div class="field"><label>What role are you looking for? <span class="required-mark">*</span></label><input id="su-role" placeholder="e.g. Senior Frontend Engineer" oninput="signupData.primary_role=this.value" /><div class="field-error" id="err-role"></div></div>`
       : `<div class="field"><label>Company name <span class="required-mark">*</span></label><input id="su-role" placeholder="e.g. Nebula Labs" oninput="signupData.company_name=this.value" /><div class="field-error" id="err-role"></div></div>`}
@@ -3507,7 +3564,7 @@ function renderEmailVerification() {
       <button class="chat-back" onclick="renderSignup()">${icon('back')}</button>
     </div>
     <div class="onb-title">Verify your email</div>
-    <div class="onb-sub">We sent a 6-digit code to <b>${signupData.email || 'your email'}</b>. This keeps Mutch free of fake accounts.</div>
+    <div class="onb-sub">We sent a 6-digit code to <b>${signupData.email || 'your email'}</b>. ${MVP_SHOW_BRAND_NAME ? 'This keeps Mutch free of fake accounts.' : 'This keeps the platform free of fake accounts.'}</div>
     <div class="field" style="margin-top:20px"><label>Verification code</label><input id="verify-code-input" placeholder="6-digit code" maxlength="6" inputmode="numeric" /></div>
     <div class="match-note">${icon('sparkle')} Demo mode — any 6 digits will work.</div>
     <button class="btn btn-full" style="margin:18px 24px 0;width:calc(100% - 48px)" onclick="verifyEmailCode()">Verify & continue</button>
@@ -3517,7 +3574,7 @@ function renderEmailVerification() {
 function verifyEmailCode() {
   const val = (document.getElementById('verify-code-input').value || '').trim();
   if (!/^\d{6}$/.test(val)) { showToast('Enter the 6-digit code sent to your email'); return; }
-  showToast('Email verified — welcome to Mutch!');
+  showToast(MVP_SHOW_BRAND_NAME ? 'Email verified — welcome to Mutch!' : 'Email verified — welcome!');
   startOnboarding();
 }
 
@@ -3950,7 +4007,7 @@ function openMatch(item) {
   }
   document.getElementById('match-sheet').innerHTML = `
     <div class="match-figures">
-      ${MVP_SHOW_LOGO ? `<img src="${logoSrc()}" alt="M" /><span class="match-utch">utch</span>` : `<div class="match-title-mvp">Mutch!</div>`}
+      ${MVP_SHOW_LOGO ? `<img src="${logoSrc()}" alt="M" /><span class="match-utch">utch</span>` : `<div class="match-title-mvp">${MVP_SHOW_BRAND_NAME ? 'Mutch!' : 'You matched!'}</div>`}
     </div>
     <div class="match-sub">${app === 'candidate' ? `${item.company} selected you from among their applicants — this isn't a random swipe, you already knew each other.` : `${item.name} had already applied — that's why the match could happen.`}</div>
     <div class="match-note">${icon('clock')} ${app === 'candidate' ? `This company has <b>7 days</b> to respond to you. If they don't, we'll close the application and let you know.` : `You have <b>7 days</b> to respond. If the deadline passes with no response, the application closes and it may affect your response-rate stats.`}</div>
@@ -3962,22 +4019,37 @@ function openMatch(item) {
 function renderMatchList() {
   const el = document.getElementById('screen-list');
   const title = app === 'candidate' ? 'Matches' : 'Chats';
-  if (!matchesData.length) {
+  const isCandidate = app === 'candidate';
+  const pendingApplications = isCandidate ? appliedJobs.filter(a => !matchesData.find(m => m.id === 'm-'+a.job.id)) : [];
+  if (!matchesData.length && !pendingApplications.length) {
     el.innerHTML = `<div class="screen-title-row"><div class="screen-title">${title}</div></div>
       <div class="empty-state"><div class="empty-icon">${icon('message')}</div>
       <div style="font-weight:700;font-size:17px;font-family:var(--font-display)">No conversations yet</div>
       <div style="color:var(--muted);font-size:13px">${app==='candidate' ? 'When a company selects you, the chat shows up here.' : 'Invite candidates who already applied from Discover.'}</div></div>`;
     return;
   }
-  el.innerHTML = `<div class="screen-title-row"><div class="screen-title">${title}</div></div>
-    <div class="list-scroll">${matchesData.map(m => `
-      <div class="row" onclick="activeChatId='${m.id}'; goTo('chat'); renderChat();">
+  const matchRows = matchesData.map(m => `
+      <div class="row row-matched" onclick="activeChatId='${m.id}'; goTo('chat'); renderChat();">
         <div class="row-avatar">${m.initials}</div>
         <div class="row-text">
-          <div class="row-top"><div class="row-name">${m.name}</div><div class="row-time">now</div></div>
+          <div class="row-top"><div class="row-name">${m.name} <span class="row-badge-matched">${icon('check')} Matched</span></div><div class="row-time">now</div></div>
           <div class="row-sub">${m.subtitle}</div><div class="row-msg">${m.lastMsg}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">${slaPillHTML(m)}${appStatusPillHTML(m)}</div>
-        </div></div>`).join('')}</div>`;
+        </div></div>`).join('');
+  const applicationRows = pendingApplications.map(a => `
+      <div class="row row-pending" onclick="openJobDetail('${a.job.id}')">
+        <div class="row-avatar row-avatar-pending">${initialAvatar(a.job.company)}</div>
+        <div class="row-text">
+          <div class="row-top"><div class="row-name">${a.job.role} <span class="row-badge-pending">Applied</span></div><div class="row-time">${a.applied_date}</div></div>
+          <div class="row-sub">${a.job.company}</div>
+          <div class="row-msg">Waiting to hear back — no response from them yet</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">${slaPillHTML({status:'active', secondsLeft:a.secondsLeft, slaDays:a.job.response_days})}</div>
+        </div></div>`).join('');
+  el.innerHTML = `<div class="screen-title-row"><div class="screen-title">${title}</div></div>
+    <div class="list-scroll">
+      ${matchesData.length ? `<div class="section-label">Matches</div>${matchRows}` : ''}
+      ${isCandidate && pendingApplications.length ? `<div class="section-label">Your applications <span style="opacity:.6">(${pendingApplications.length})</span></div>${applicationRows}` : ''}
+    </div>`;
 }
 function slaPillHTML(m) {
   if (m.status === 'invited') return `<div class="sla-pill">${icon('message')} Invited — awaiting application</div>`;
@@ -4074,7 +4146,7 @@ function openBulkRejectionReason(showOtherBox) {
   document.getElementById('detail-overlay').innerHTML = `
     <div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Reason for rejecting ${ids.length} candidates</div></div>
     <div class="detail-body">
-      <div class="match-note">${icon('sparkle')} At Mutch, we value feedback as much as candidates and employers do — that's why we ask every company to guarantee a reason for each application, instead of leaving people in silence.</div>
+      <div class="match-note">${icon('sparkle')} ${MVP_SHOW_BRAND_NAME ? 'At Mutch, we' : 'We'} value feedback as much as candidates and employers do — that's why we ask every company to guarantee a reason for each application, instead of leaving people in silence.</div>
       <div class="match-note">${icon('alert')} This reason will be shown to each candidate in their Diary — be honest but kind.</div>
       <div class="detail-block-label">Pick the closest reason</div>
       <div class="chip-row">${REJECTION_REASONS.map(r=>`<span class="chip ${r==='Other'&&showOtherBox?'on':''}" onclick="${r==='Other' ? 'openBulkRejectionReason(true)' : `setBulkRejectionReason('${r.replace(/'/g,"\\'")}')`}">${r}</span>`).join('')}</div>
@@ -4327,7 +4399,7 @@ function jobFormStepBody(d, step) {
       ${jobChipMulti('work_locations', jobWithCustom('work_locations', ['Anywhere','Spain','European Union','United Kingdom','United States','Latin America']))}
       ${jobCustomAddRow('work_locations', "Add a country or region…", true)}
       <div class="onb-field-label" style="margin-left:0;margin-top:24px">Required skills</div>
-      ${jobChipMulti('skills', ['React','TypeScript','Node.js','Python','Go','SQL','Figma','AWS'])}
+      ${jobChipMulti('skills', jobWithCustom('skills', ['React','TypeScript','Node.js','Python','Go','SQL','Figma','AWS']))}
       ${jobCustomAddRow('skills', 'Add a skill not listed…', true)}
       <div class="onb-field-label" style="margin-left:0;margin-top:24px">Required tools</div>
       ${jobChipMulti('tools', jobWithCustom('tools', ['Slack','Jira','Figma','Notion','GitHub','Linear']))}
@@ -4646,7 +4718,7 @@ function openRejectionReason(matchId, showOtherBox) {
   document.getElementById('detail-overlay').innerHTML = `
     <div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Reason for rejecting ${m.name}</div></div>
     <div class="detail-body">
-      <div class="match-note">${icon('sparkle')} At Mutch, we value feedback as much as candidates and employers do — that's why we ask every company to guarantee a reason for each application, instead of leaving people in silence.</div>
+      <div class="match-note">${icon('sparkle')} ${MVP_SHOW_BRAND_NAME ? 'At Mutch, we' : 'We'} value feedback as much as candidates and employers do — that's why we ask every company to guarantee a reason for each application, instead of leaving people in silence.</div>
       <div class="match-note">${icon('alert')} This reason will be shown to the candidate in their Diary — be honest but kind.</div>
       <div class="detail-block-label">Pick the closest reason</div>
       <div class="chip-row">${REJECTION_REASONS.map(r=>`<span class="chip ${(r==='Other' ? isOtherSelected : m.rejection_reason===r)?'on':''}" onclick="${r==='Other' ? `openRejectionReason('${matchId}', true)` : `setRejectionReason('${matchId}','${r.replace(/'/g,"\\'")}')`}">${r}</span>`).join('')}</div>
@@ -4677,12 +4749,6 @@ function setRejectionReason(matchId, reason) {
 }
 function openDiary() {
   const entries = [
-    // Worked examples, one per status, so every category shows even before you have real ones.
-    { role: 'Product Designer', company: 'Aurora', status: 'Reviewing candidacy', reason: '', jobId: 'j2' },
-    { role: 'Senior Frontend Engineer', company: 'Nebula Labs', status: 'Interview scheduled', reason: '', jobId: 'j1' },
-    { role: 'Backend Engineer (Go)', company: 'Quantic', status: 'Final round', reason: '', jobId: 'j3' },
-    { role: 'Mobile Engineer (RN)', company: 'Loop', status: 'Offer sent', reason: '', jobId: 'j4' },
-    { role: 'Backend Engineer', company: 'Vertex Systems', status: 'Rejected', reason: "Went with another candidate", jobId: null },
     ...matchesData.filter(m => m.status !== 'invited').map(m => ({ role: m.subtitle, company: m.company_name || m.name, status: m.app_status || 'Reviewing candidacy', reason: m.rejection_reason, jobId: null, matchId: m.id })),
     ...appliedJobs.filter(a => !matchesData.find(m => m.id === 'm-'+a.job.id)).map(a => ({ role: a.job.role, company: a.job.company, status: 'Reviewing candidacy', reason: '', jobId: a.job.id })),
   ];
@@ -4821,7 +4887,7 @@ function buildDraftProfile() {
   draftProfile = {
     first_name: d.first_name || 'Ana',
     last_name: d.last_name || 'Torres',
-    email: d.email || signupData.email || 'ana@mutch.dev',
+    email: d.email || signupData.email || (MVP_SHOW_BRAND_NAME ? 'ana@mutch.dev' : 'ana@example.com'),
     phone: d.phone || signupData.phone || '+34 600 000 000',
     portfolio_link: 'anatorres.dev',
     headline: d.primary_role || signupData.primary_role || 'Senior Frontend Engineer',
@@ -4833,9 +4899,13 @@ function buildDraftProfile() {
     work_authorization: d.work_authorization || 'No restrictions',
     years_experience: d.years_experience || '6',
     work_setup: (d.work_setup && d.work_setup.length) ? d.work_setup : ['Remote'],
+    timezone_pref: d.timezone_pref || '',
+    hybrid_min_days: d.hybrid_min_days || '',
+    onsite_city: d.onsite_city || '',
+    onsite_city_custom: d.onsite_city_custom || [],
     availability: d.availability || (d.availability_date ? '' : 'Immediately'),
     availability_date: d.availability_date || '',
-    company_size_pref: d.company_size_pref || 'Scale-up (51-500)',
+    company_size_pref: (d.company_size_pref && d.company_size_pref.length) ? d.company_size_pref : ['Scale-up (51-500)'],
     skills: (d.skills && d.skills.length) ? d.skills : ['React','TypeScript','Next.js','Design Systems'],
     languages: (d.languages && d.languages.length) ? d.languages : ['English','Spanish'],
     language_levels: d.language_levels || { English: 'Advanced', Spanish: 'Native / Professional' },
@@ -4851,7 +4921,7 @@ function buildDraftProfile() {
     education: [
       { title:"BSc Computer Science", institution:"Universidad Politécnica de Madrid", grade:"", start:"2015-09", end:"2019-06" },
     ],
-    cv_filename: 'ana_torres_cv.pdf',
+    cv_filename: uploadedCvFilename || 'ana_torres_cv.pdf',
     push_alerts: d.push_alerts !== false,
   };
 }
@@ -4868,7 +4938,7 @@ function startOnboarding() {
     onboardData.first_name = parts[0];
     onboardData.last_name = parts.slice(1).join(' ') || '';
   }
-  cvParsing = false; cvParsed = false; cvSuggestState = 'idle';
+  cvParsing = false; cvParsed = false; cvSuggestState = 'idle'; uploadedCvFilename = '';
   goTo('onboarding');
   renderOnboarding();
 }
@@ -4986,7 +5056,7 @@ function candStepBody(i) {
   if (i === 2) {
     const field = onboardData.work_field;
     const baseSkills = SKILLS_BY_FIELD[field] || ["React","Figma","SQL","Python","Marketing","Sales"];
-    const extraSkills = onboardData.custom_skills || [];
+    const extraSkills = onboardData.skills_custom || [];
     const skillOptions = [...new Set([...baseSkills, ...extraSkills])];
     const selectedLangs = onboardData.languages || [];
     return `
@@ -5012,7 +5082,7 @@ function candStepBody(i) {
     ${chipMulti('cultural_values', withCustom('cultural_values', ['Ownership','Work-life balance','Fast-paced','Mentorship','Diversity','Async-first','Transparency','Flat hierarchy','Learning budget','4-day week']))}
     ${customAddRow('cultural_values', 'Add another value…', true)}
     <div class="onb-field-label">What size company do you prefer working for?</div>
-    ${chipSelect('company_size_pref', ['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'])}`;
+    ${chipMulti('company_size_pref', ['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'])}`;
   if (i === 4) return `
     <div class="onb-block"><div class="match-note">${icon('clock')} Companies commit to a response window (1 to 3 weeks, set by them) once they match with you. If it runs out, we close the loop and follow up on your behalf.</div></div>
     <div class="onb-block" style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
@@ -5085,7 +5155,7 @@ function validateOnboardStep() {
     }
     if (i === 3) {
       if (!(d.cultural_values||[]).length) missing.push('at least one cultural non-negotiable');
-      if (!d.company_size_pref) missing.push('your preferred company size');
+      if (!(d.company_size_pref||[]).length) missing.push('your preferred company size');
     }
   } else {
     if (i === 0) {
@@ -5155,9 +5225,10 @@ function cvStepHTML() {
     <div class="onb-title">Create your profile only once</div>
     <div class="onb-sub">Our AI reads your CV and fills this in for you — everything below is already editable.</div>
     <div class="profile-scroll" style="padding-top:10px">
-      <div class="prep-card" onclick="simulateCvParse()" style="margin-bottom:14px">
+      <input type="file" id="cv-file-input" accept=".pdf,application/pdf" style="display:none" onchange="handleCvFileSelected(this)" />
+      <div class="prep-card" onclick="triggerCvUpload()" style="margin-bottom:14px">
         <div class="prep-icon">${cvParsed ? icon('check') : icon('plus')}</div>
-        <div><div class="prep-title">${cvParsed ? 'ana_torres_cv.pdf' : 'Upload your CV'}</div><div class="prep-desc">${cvParsed ? 'Uploaded and analyzed with AI' : 'PDF, max 10MB — tap to upload'}</div></div>
+        <div><div class="prep-title">${cvParsed ? (uploadedCvFilename || 'ana_torres_cv.pdf') : 'Upload your CV'}</div><div class="prep-desc">${cvParsed ? 'Uploaded and analyzed with AI' : 'PDF, max 10MB — tap to upload'}</div></div>
       </div>
       ${cvParsing ? `<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">Analyzing with AI…</div>` : ''}
       ${cvParsed ? `
@@ -5257,7 +5328,7 @@ async function downloadCvSuggestion() {
   if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF…'; }
   try {
     const blob = await renderCvPdfBlob();
-    const filename = `${(draftProfile.first_name||'candidate').toLowerCase()}-${(draftProfile.last_name||'cv').toLowerCase()}-mutch-cv.pdf`;
+    const filename = `${(draftProfile.first_name||'candidate').toLowerCase()}-${(draftProfile.last_name||'cv').toLowerCase()}${MVP_SHOW_BRAND_NAME ? '-mutch' : ''}-cv.pdf`;
     const result = await downloads.save({ filename, data: blob });
     if (result.status === 'saved') showToast('CV downloaded');
   } catch (err) {
@@ -5268,7 +5339,7 @@ async function downloadCvSuggestion() {
 }
 function acceptCvSuggestion() {
   draftProfile.bio = cvSuggestBio;
-  draftProfile.cv_filename = `${(draftProfile.first_name||'candidate').toLowerCase()}-mutch-cv.pdf`;
+  draftProfile.cv_filename = `${(draftProfile.first_name||'candidate').toLowerCase()}${MVP_SHOW_BRAND_NAME ? '-mutch' : ''}-cv.pdf`;
   cvSuggestState = 'idle';
   showToast('New CV saved — summary updated, download it anytime from your profile');
   renderOnboarding();
@@ -5277,8 +5348,16 @@ function discardCvSuggestion() {
   cvSuggestState = 'idle';
   renderOnboarding();
 }
-function simulateCvParse() {
+let uploadedCvFilename = '';
+function triggerCvUpload() {
   if (cvParsed || cvParsing) return;
+  document.getElementById('cv-file-input').click();
+}
+function handleCvFileSelected(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!/\.pdf$/i.test(file.name)) { showToast('Please upload a PDF file'); input.value = ''; return; }
+  uploadedCvFilename = file.name;
   cvParsing = true; renderOnboarding();
   setTimeout(() => { cvParsing = false; cvParsed = true; buildDraftProfile(); renderOnboarding(); }, 1400);
 }
@@ -5291,9 +5370,32 @@ function congratsHTML() {
       <button class="btn" style="margin-top:18px" onclick="finishOnboarding()">${app==='candidate' ? 'Check the job offers that match with you' : 'Start discovering candidates'}</button>
     </div>`;
 }
+/* ============================== ACCOUNTS (localStorage) ============================== */
+// A lightweight local "accounts" store so Continue only works once someone
+// has actually created an account and can log back in with the same
+// email/password. Lives entirely in this browser (no real backend), but is
+// enough to make signup -> login feel real for testing.
+function loadAccounts() {
+  try { return JSON.parse(localStorage.getItem('mutch_accounts') || '[]'); } catch (e) { return []; }
+}
+function saveAccounts(accounts) {
+  try { localStorage.setItem('mutch_accounts', JSON.stringify(accounts)); } catch (e) {}
+}
+function registerAccount(role, email, password, profileSnapshot) {
+  if (!email || !password) return;
+  const accounts = loadAccounts();
+  const idx = accounts.findIndex(a => a.email.toLowerCase() === email.toLowerCase());
+  const record = { role, email, password, profile: profileSnapshot, savedAt: Date.now() };
+  if (idx >= 0) accounts[idx] = record; else accounts.push(record);
+  saveAccounts(accounts);
+}
+function findAccount(email, password) {
+  return loadAccounts().find(a => a.email.toLowerCase() === (email || '').trim().toLowerCase() && a.password === password);
+}
 function finishOnboarding() {
   if (app === 'candidate') {
     Object.assign(CANDIDATE_PROFILE, draftProfile, { name: `${draftProfile.first_name} ${draftProfile.last_name}` });
+    registerAccount('candidate', signupData.email, signupData.password, { ...CANDIDATE_PROFILE });
   } else {
     Object.assign(COMPANY_PROFILE, {
       name: onboardData.company_name || COMPANY_PROFILE.name,
@@ -5305,6 +5407,7 @@ function finishOnboarding() {
       culture_values: (onboardData.culture_values && onboardData.culture_values.length) ? onboardData.culture_values : COMPANY_PROFILE.culture_values,
       sla_days: onboardData.sla_days ? parseInt(onboardData.sla_days) : COMPANY_PROFILE.sla_days,
     });
+    registerAccount('recruiter', signupData.email, signupData.password, { ...COMPANY_PROFILE });
   }
   goTo(app === 'candidate' ? 'swipe' : 'jobs');
   if (app === 'recruiter') freshRecruiterOnboarding = true;
@@ -5867,7 +5970,7 @@ function candidateProfileFieldsHTML(p, objName, rerenderFn) {
       <div style="margin-top:10px">${profileWorkSetupDetail(p, objName, rerenderFn)}</div>
     </div>
     <div class="field" style="padding:0;margin-top:20px"><label>Preferred company size</label>
-      <div class="chip-row" style="margin-top:6px">${['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'].map(o=>`<span class="chip ${(p.company_size_pref||'Scale-up (51-500)')===o?'on':''}" onclick="${objName}.company_size_pref='${o}';${rerenderFn}()">${o}</span>`).join('')}</div>
+      <div class="chip-row" style="margin-top:6px">${['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'].map(o=>`<span class="chip ${(p.company_size_pref||[]).includes(o)?'on':''}" onclick="${objName}.company_size_pref=${objName}.company_size_pref||[]; const i=${objName}.company_size_pref.indexOf('${o}'); if(i>=0){${objName}.company_size_pref.splice(i,1);}else{${objName}.company_size_pref.push('${o}');} ${rerenderFn}()">${o}</span>`).join('')}</div>
     </div>
     <div class="field" style="padding:0;margin-top:20px"><label>Skills</label>${editableChipRow(objName, 'skills', p.skills, rerenderFn, 'Add a skill…')}</div>
     <div class="field" style="padding:0;margin-top:20px"><label>Languages</label>${editableChipRow(objName, 'languages', p.languages, rerenderFn, 'Add a language…', s => s + (p.language_levels && p.language_levels[s] ? ' · '+p.language_levels[s] : ''))}</div>
@@ -5934,6 +6037,7 @@ function showToast(msg) {
 document.getElementById('switcher').innerHTML = `
   <button data-app="candidate" class="active" onclick="switchApp('candidate')">${icon('search')} Candidate</button>
   <button data-app="recruiter" onclick="switchApp('recruiter')">${icon('briefcase')} Recruiter</button>`;
+document.title = MVP_SHOW_BRAND_NAME ? 'Mutch' : 'Job Match Preview';
 renderLogo();
 renderLogin();
 document.getElementById('bell-btn').style.display = 'none';
