@@ -546,6 +546,11 @@
     body { padding: 0; gap: 0; min-height: 100dvh; }
     #phone { width: 100vw; height: 100dvh; max-width: 100%; max-height: 100%; border-radius: 0; box-shadow: none; }
     #notch { display: none; }
+    .app-header { padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 10px; }
+    .login-photo-bg { height: calc(140px + env(safe-area-inset-top, 0px)); }
+    .login-sheet { top: calc(110px + env(safe-area-inset-top, 0px)); }
+    .carousel-slide { min-height: 60px !important; }
+    #screen-login .field input { padding-top: 9px !important; padding-bottom: 9px !important; }
   }
 </style>
 </head>
@@ -4882,8 +4887,62 @@ let onboardStepError = '';
 let onboardData = {};
 let cvParsing = false, cvParsed = false;
 let draftProfile = {};
+const CV_FAKE_COMPANIES = ['Pixelbee','Klarafy','Northlight','Verdant Labs','Fernway','Circuit & Co','Harborline','Driftcloud','Emberly','Basecamp Robotics'];
+const CV_COMPANIES_BY_FIELD = {
+  Hospitality: ['Hôtel Belleval','Brasserie Lucien','Le Comptoir Saint-Martin','Maison Ondine','Café des Arts','Hôtel Verlaine','Bistro Rosier'],
+  "Finance & Accounting": ['Cabinet Fiscalia','Meridian Bank','Ledgerline','Harborline','Trellis HR'],
+  Sales: ['Marrow Robotics','Trellis HR','Solstice Retail','Vantage Freight','Harborline'],
+  Marketing: ['Solstice Retail','Larkspur Media','Coral & Ivy','Wren Creative','Palette & Pine'],
+};
+const EDUCATION_BY_FIELD = {
+  Engineering: "BSc Computer Science", Design: "BA Design", Product: "BSc Business & Technology",
+  Data: "BSc Statistics", Marketing: "BA Marketing", Sales: "BA Business Administration",
+  Hospitality: "Hospitality Management Diploma", "Finance & Accounting": "BSc Finance & Accounting",
+};
+// Simulates what an AI reading the uploaded CV would fill in — but only for
+// fields onboarding never asked about (bio, work history, projects,
+// education). Everything the candidate already entered during onboarding
+// (role, skills, years of experience, location, etc.) is used as input to
+// personalize this, and is never overwritten by it.
+function generateCvExtractedContent(d) {
+  const role = d.primary_role || 'Professional';
+  const field = d.work_field || 'Engineering';
+  const skills = (d.skills && d.skills.length) ? d.skills : (SKILLS_BY_FIELD[field] || []).slice(0, 3);
+  const skillList = skills.slice(0, 3).join(', ') || field.toLowerCase();
+  const years = Math.max(parseInt(d.years_experience) || 4, 1);
+  const shuffled = [...(CV_COMPANIES_BY_FIELD[field] || CV_FAKE_COMPANIES)].sort(() => Math.random() - 0.5);
+  const c1 = shuffled[0], c2 = shuffled[1];
+  const now = new Date();
+  const recentSpan = Math.min(years, 3);
+  const recentStart = new Date(now.getFullYear() - recentSpan, 2);
+  const hasPrior = years > recentSpan;
+  const priorSpan = Math.max(years - recentSpan, 1);
+  const priorStart = new Date(recentStart.getFullYear() - priorSpan, 5);
+  const fmt = (dt) => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+  const work_story = [
+    { role, company: c1, start: fmt(recentStart), end: '', current: true,
+      summary: `Drive ${field.toLowerCase()} work at ${c1}, working hands-on with ${skillList}.`,
+      responsibilities: `Delivered projects end to end using ${skillList}; partnered closely with cross-functional teams to ship results.` },
+  ];
+  if (hasPrior) {
+    work_story.push({ role: `${role}, Early Career`, company: c2, start: fmt(priorStart), end: fmt(recentStart), current: false,
+      summary: `Contributed to core ${field.toLowerCase()} initiatives at ${c2}.`,
+      responsibilities: `Built foundational skills in ${skillList} while supporting the wider team.` });
+  }
+  const projects = [
+    { title: `${skills[0] || field} project`, company: c1, description: `A ${field.toLowerCase()} project centered on ${skillList}, delivered at ${c1}.`, link: '' },
+  ];
+  const eduEnd = hasPrior ? priorStart : recentStart;
+  const eduStart = new Date(eduEnd.getFullYear() - 4, 8);
+  const education = [
+    { title: EDUCATION_BY_FIELD[field] || 'Professional certification', institution: 'State University', grade: '', start: fmt(eduStart), end: fmt(eduEnd) },
+  ];
+  const bio = `${role} with ${years}+ years of experience, focused on ${skills.slice(0,2).join(' and ') || field.toLowerCase()}.`;
+  return { bio, work_story, projects, education };
+}
 function buildDraftProfile() {
   const d = onboardData;
+  const cvContent = generateCvExtractedContent(d);
   draftProfile = {
     first_name: d.first_name || 'Ana',
     last_name: d.last_name || 'Torres',
@@ -4891,7 +4950,7 @@ function buildDraftProfile() {
     phone: d.phone || signupData.phone || '+34 600 000 000',
     portfolio_link: 'anatorres.dev',
     headline: d.primary_role || signupData.primary_role || 'Senior Frontend Engineer',
-    bio: 'I build accessible, fast interfaces. 6 years in React and design systems.',
+    bio: cvContent.bio,
     location: d.location || 'Madrid, Spain',
     min_salary: (d.min_salary_amount || '120,000') + ' ' + (d.min_salary_currency || 'USD') + ' / yr (gross)',
     min_salary_amount: d.min_salary_amount || '120,000',
@@ -4910,17 +4969,9 @@ function buildDraftProfile() {
     languages: (d.languages && d.languages.length) ? d.languages : ['English','Spanish'],
     language_levels: d.language_levels || { English: 'Advanced', Spanish: 'Native / Professional' },
     cultural_values: (d.cultural_values && d.cultural_values.length) ? d.cultural_values : ['Ownership','Async-first'],
-    work_story: [
-      { role:"Frontend Lead", company:"Pixelbee", start:"2022-03", end:"", current:true, summary:"Own the frontend architecture and design system for Pixelbee's core product.", responsibilities:"Led the design system migration; mentored 2 engineers; cut bundle size by 40%." },
-      { role:"Frontend Engineer", company:"Klarafy", start:"2019-06", end:"2022-02", current:false, summary:"Built and maintained the main customer-facing dashboard.", responsibilities:"Shipped the v2 dashboard from scratch; introduced component testing." },
-    ],
-    projects: [
-      { title:"Klarafy design system", company:"Klarafy", description:"Redesigned the design system used across 6 product teams, improving consistency and shipping speed.", link:"" },
-      { title:"Pixelbee analytics dashboard", company:"Pixelbee", description:"Built the analytics dashboard used by every customer account.", link:"" },
-    ],
-    education: [
-      { title:"BSc Computer Science", institution:"Universidad Politécnica de Madrid", grade:"", start:"2015-09", end:"2019-06" },
-    ],
+    work_story: cvContent.work_story,
+    projects: cvContent.projects,
+    education: cvContent.education,
     cv_filename: uploadedCvFilename || 'ana_torres_cv.pdf',
     push_alerts: d.push_alerts !== false,
   };
