@@ -39,7 +39,7 @@
 
   /* ---------- Onboarding wizard ---------- */
   #screen-onboarding { overflow-y: auto; padding-bottom: 24px; }
-  .onb-header { display: flex; align-items: center; gap: 10px; padding: 36px 16px 0; }
+  .onb-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 36px 16px 0; }
   .onb-progress-track { height: 5px; border-radius: 999px; background: var(--surface-3); overflow: hidden; margin: 8px 24px 16px; }
   .onb-progress-fill { height: 5px; border-radius: 999px; background: var(--brand); transition: width .25s; }
   .job-form-step-caption { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; padding: 14px 24px 12px; font-family: var(--font-body); }
@@ -75,8 +75,8 @@
   .integration-btn.connected { background: transparent; color: var(--muted); border-color: var(--border); display: flex; align-items: center; gap: 4px; }
   .integration-btn.connected .icon { width: 13px; height: 13px; }
   #screen-login, #screen-role-select { background: var(--surface); overflow-y: auto; }
-  .login-photo-bg { position: absolute; top: 0; left: 0; right: 0; height: 310px; background-size: cover; background-position: center 5%; z-index: 0; }
-  .login-sheet { position: absolute; z-index: 1; top: 270px; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 28px 28px 0 0; padding: 10px 0 6px; box-shadow: 0 -10px 26px rgba(0,0,0,0.28); overflow-y: auto; }
+  .login-photo-bg { position: absolute; top: 0; left: 0; right: 0; height: calc(clamp(170px, 30vh, 320px) + 40px + env(safe-area-inset-top, 0px)); background-size: cover; background-position: center 5%; z-index: 0; }
+  .login-sheet { position: absolute; z-index: 1; top: calc(clamp(170px, 30vh, 320px) + env(safe-area-inset-top, 0px)); left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 28px 28px 0 0; padding: 10px 0 6px; box-shadow: 0 -10px 26px rgba(0,0,0,0.28); overflow-y: auto; display: flex; flex-direction: column; justify-content: center; }
   #screen-login .field input { padding-top: 11px; padding-bottom: 11px; }
   .match-title-mvp { font-family: var(--font-display); font-weight: 700; font-size: 32px; }
   .onb-title { font-family: var(--font-display); font-weight: 700; font-size: 19px; padding: 4px 24px 0; }
@@ -555,8 +555,6 @@
     #phone { width: 100%; max-width: 480px; height: 100dvh; max-height: 100%; border-radius: 0; box-shadow: none; margin: 0 auto; }
     #notch { display: none; }
     .app-header { padding: calc(14px + env(safe-area-inset-top, 0px)) 18px 10px; }
-    .login-sheet { top: calc(150px + env(safe-area-inset-top, 0px)); }
-    .login-photo-bg { height: calc(190px + env(safe-area-inset-top, 0px)); }
     .carousel-slide { min-height: 60px !important; }
     #screen-login .field input { padding-top: 9px !important; padding-bottom: 9px !important; }
   }
@@ -4281,6 +4279,7 @@ function goTo(s) {
   document.getElementById('bell-btn').style.display = hideHeaderIcons ? 'none' : 'flex';
   document.getElementById('menu-btn').style.display = hideHeaderIcons ? 'none' : 'flex';
   document.querySelector('.app-header').classList.toggle('header-overlay', s === 'login' || s === 'role-select');
+  document.querySelector('.app-header').style.display = (s === 'onboarding') ? 'none' : 'flex';
   const fab = document.getElementById('fab');
   fab.style.display = ['swipe','list','applicants','jobs'].includes(s) ? 'flex' : 'none';
   fab.innerHTML = icon('sparkle');
@@ -6488,6 +6487,7 @@ function renderOnboarding() {
   el.innerHTML = `
     <div class="onb-header">
       ${onboardStep > 0 ? `<button class="chat-back" onclick="onboardStepError=''; onboardStep--; renderOnboarding()">${icon('back')}</button>` : `<button class="chat-back" onclick="goTo('login')">${icon('back')}</button>`}
+      <button class="icon-btn" onclick="toggleTheme()">${icon(theme === 'dark' ? 'sun' : 'moon')}</button>
     </div>
     <div class="onb-title">${meta.title}</div>
     <div class="onb-sub">${meta.sub}</div>
@@ -6501,7 +6501,7 @@ function renderOnboarding() {
 
 function cvStepHTML() {
   return `
-    <div class="onb-header"><button class="chat-back" onclick="onboardStep--; renderOnboarding()">${icon('back')}</button></div>
+    <div class="onb-header"><button class="chat-back" onclick="onboardStep--; renderOnboarding()">${icon('back')}</button><button class="icon-btn" onclick="toggleTheme()">${icon(theme === 'dark' ? 'sun' : 'moon')}</button></div>
     <div class="onb-title">Create your profile only once</div>
     <div class="onb-sub">Our AI reads your CV and fills this in for you — everything below is already editable.</div>
     <div class="profile-scroll" style="padding-top:10px">
@@ -6683,6 +6683,7 @@ async function handleCvFileSelected(input) {
 }
 function congratsHTML() {
   return `
+    <div class="onb-header" style="justify-content:flex-end"><button class="icon-btn" onclick="toggleTheme()">${icon(theme === 'dark' ? 'sun' : 'moon')}</button></div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:8px">
       <div class="congrats-badge">${icon('check')}</div>
       <div style="font-family:var(--font-display);font-weight:700;font-size:26px;margin-top:8px">Congratulations!</div>
