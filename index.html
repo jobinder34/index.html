@@ -612,7 +612,22 @@
 // MVP toggle — flip back to true to restore the brand name everywhere it was before.
 const MVP_SHOW_BRAND_NAME = false;
 if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  // Workers loaded directly from a different origin (cdnjs) than the page
+  // itself (github.io) are blocked by some browsers' same-origin worker
+  // restrictions. Fetching the worker script and re-serving it as a
+  // same-origin blob: URL sidesteps that restriction reliably.
+  window.__pdfWorkerSetup = fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js')
+    .then(r => r.text())
+    .then(code => {
+      const blobUrl = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
+      pdfjsLib.GlobalWorkerOptions.workerSrc = blobUrl;
+    })
+    .catch(() => {
+      // Last resort: point straight at the CDN file. Some browsers allow
+      // this anyway; if not, extractCvText's own try/catch + timeout still
+      // falls back cleanly to the profile-based generator.
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+    });
 }
 /* ============================== ICONS ============================== */
 const ICONS = {
@@ -4610,7 +4625,7 @@ function attemptLogin() {
 function renderRoleSelect() {
   document.getElementById('screen-role-select').innerHTML = `
     <div class="login-photo-bg" style="background-image:url('${ROLE_BG_TALL_SRC}')"></div>
-    <div class="login-sheet">
+    <div class="login-sheet" style="justify-content:flex-start;padding-top:28px">
     <div class="onb-header"><button class="chat-back" onclick="goTo('login')">${icon('back')}</button></div>
     <div class="onb-title" style="padding:4px 24px 4px">Are you looking for a job, or hiring for one?</div>
     <div class="onb-sub" style="padding:0 24px">Pick what fits — takes 2 minutes to get started.</div>
@@ -4878,10 +4893,17 @@ function computeMatchScore(job) {
   let score = 30;
   const sharedSkills = (p.skills||[]).filter(s => job.tags.includes(s));
   score += Math.min(sharedSkills.length, 4) * 15;
-  if ((p.work_setup||[]).includes('Remote') && /remote/i.test(job.location)) score += 8;
+  const wantsRemoteOnly = (p.work_setup||[]).length > 0 && (p.work_setup||[]).every(w => w === 'Remote');
+  const jobIsRemote = /remote/i.test(job.location);
+  if (wantsRemoteOnly && jobIsRemote) score += 8;
   if ((p.languages||[]).some(l => job.languages.some(jl => jl.toLowerCase().startsWith(l.toLowerCase())))) score += 6;
   if (!isGatedForCandidate(job)) score += 8;
-  return Math.min(98, score);
+  score = Math.min(98, score);
+  // Real filter, not just a bonus: if the candidate only wants remote work,
+  // an on-site role never counts as a strong match, no matter how many
+  // skills line up — it can still show up under lower compatibility.
+  if (wantsRemoteOnly && !jobIsRemote) score = Math.min(score, 50);
+  return score;
 }
 function computeWhyForYou(job) {
   const p = CANDIDATE_PROFILE;
@@ -6632,17 +6654,23 @@ let uploadedCvFilename = '';
 let cvExtractedText = '';
 async function extractCvText(file) {
   try {
+    const withTimeout = (promise, ms) => Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('CV extraction timed out')), ms)),
+    ]);
     const buf = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    if (!window.pdfjsLib) throw new Error('pdf.js not available');
+    if (window.__pdfWorkerSetup) await withTimeout(window.__pdfWorkerSetup, 4000).catch(() => {});
+    const pdf = await withTimeout(pdfjsLib.getDocument({ data: buf }).promise, 6000);
     let text = '';
     for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
+      const page = await withTimeout(pdf.getPage(i), 6000);
+      const content = await withTimeout(page.getTextContent(), 6000);
       text += content.items.map(it => it.str).join(' ') + '\n';
     }
     return text.replace(/[ \t]+/g, ' ').trim();
   } catch (e) {
-    console.error('CV text extraction failed', e);
+    console.error('CV text extraction failed, falling back to profile-based generation', e);
     return '';
   }
 }
@@ -6678,7 +6706,12 @@ async function handleCvFileSelected(input) {
   if (!/\.pdf$/i.test(file.name)) { showToast('Please upload a PDF file'); input.value = ''; return; }
   uploadedCvFilename = file.name;
   cvParsing = true; renderOnboarding();
-  cvExtractedText = await extractCvText(file);
+  try {
+    cvExtractedText = await extractCvText(file);
+  } catch (e) {
+    console.error('Unexpected CV upload error, continuing with profile-based generation', e);
+    cvExtractedText = '';
+  }
   cvParsing = false; cvParsed = true; buildDraftProfile(); renderOnboarding();
 }
 function congratsHTML() {
