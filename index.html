@@ -1424,15 +1424,22 @@
   .phone-input-row .phone-prefix { width:112px; flex:0 0 112px; }
   .phone-input-row .phone-number { flex:1; min-width:0; }
   .phone-input-row .phone-prefix {
-    appearance:auto; -webkit-appearance:menulist;
+    appearance:none!important; -webkit-appearance:none!important;
     background-color:#fff!important; color:#1f1f1f!important;
     border:1.5px solid var(--border)!important; border-radius:16px!important;
-    font-family:var(--font-body)!important; font-size:15px!important; font-weight:400!important;
-    height:auto; padding:14px 10px!important; line-height:1.2;
+    font-family:var(--font-body)!important; font-size:15px!important; font-weight:500!important;
+    height:50px!important; padding:0 34px 0 14px!important; line-height:50px!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23868c96' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")!important;
+    background-repeat:no-repeat!important; background-position:right 12px center!important; background-size:16px!important;
   }
   [data-theme="dark"] .phone-input-row .phone-prefix {
-    background-color:var(--surface-2)!important; color:var(--on-surface)!important;
+    background-color:var(--raised)!important; color:var(--on-surface)!important;
   }
+  .interest-primary{background:var(--brand)!important;color:var(--brand-ink)!important}
+  .interest-primary .icon{color:var(--brand-ink)!important}
+  .interest-secondary{background:var(--on-surface)!important;color:var(--surface)!important}
+  .interest-secondary .icon{color:var(--brand)!important}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 
@@ -6035,7 +6042,7 @@ function candidateCardHTML(c) {
     <div class="nx-body">
     <div class="nx-duo">
       <div class="nx-tile"><span>Expected salary</span><b title="${c.salary}">${c.salary}</b></div>
-      <div class="nx-tile accent"><span>Available</span><b>${c.available_from}</b></div>
+      <div class="nx-tile accent"><span>Available from</span><b>${c.available_from}</b></div>
     </div>
     <div class="nx-inline">
       <span class="nx-inl">${icon('message')}<b>${(c.languages || []).slice(0,2).join(', ') || '—'}</b>${candidateYears(c) ? `<i>${candidateYears(c)} ${Number(candidateYears(c)) === 1 ? 'yr' : 'yrs'} experience</i>` : ''}</span>
@@ -6215,9 +6222,9 @@ function currentDeck() {
     return scoredCandidates.filter(s => s.score < 60).sort((a, b) => b.score - a.score).map(s => s.c);
   }
   const strong = scoredCandidates.filter(s => s.score >= 60).sort((a, b) => b.score - a.score);
-  // A newly created/sparse job should never render a visually blank Discover deck.
-  // Until enough requirements exist to produce 60%+ matches, show the best available candidates.
-  return (strong.length ? strong : scoredCandidates.sort((a,b)=>b.score-a.score)).map(s => s.c);
+  // Keep the explicit broader-suggestions flow: if there are no 60%+ matches,
+  // renderDeck shows a proper empty state with the lower-compatibility CTA.
+  return strong.map(s => s.c);
 }
 function renderDeck() {
   const area = document.getElementById('screen-swipe');
@@ -6363,8 +6370,8 @@ function openRecruiterInterestPopup(c) {
       <div class="applied-title">Interest saved!</div>
       <div class="applied-sub">We'll let you know if <b>${c.name}</b> applies to one of your roles — that's when the chat opens up.</div>
       <div class="match-note" style="text-align:left">${icon('sparkle')} Want to speed things up? Invite them to apply directly.</div>
-      <button class="btn btn-full" style="margin-bottom:10px" onclick="toggleAppliedPopup(false); openInvite(${JSON.stringify(c).replace(/"/g,'&quot;')})">${icon('message')} Invite to chat</button>
-      <button class="btn btn-full btn-secondary" onclick="toggleAppliedPopup(false)">${icon('grid')} Keep scrolling</button>
+      <button class="btn btn-full interest-primary" style="margin-bottom:10px" onclick="toggleAppliedPopup(false)">${icon('grid')} Keep scrolling</button>
+      <button class="btn btn-full interest-secondary" onclick="toggleAppliedPopup(false); openInvite(${JSON.stringify(c).replace(/"/g,'&quot;')})">${icon('message')} Invite to chat</button>
     </div>`;
   toggleAppliedPopup(true);
 }
@@ -7170,7 +7177,7 @@ function jobWorkSetupDetail() {
  const setup=newJobData.work_setup||[]; let out='';
  setup.forEach(type=>{
   if(type==='Remote') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Timezone requirement</div>${jobChipMulti('timezone_req',['Any timezone','UTC-8 to UTC-5 (Americas)','UTC+0 to UTC+2 (Europe/Africa)','UTC+3 to UTC+6 (Middle East/S. Asia)','UTC+7 to UTC+10 (Asia/Pacific)','Within 3h of the team'])}<div class="field" style="padding:0;margin-top:10px"><input class="flat-input" placeholder="Other / additional detail (optional)" value="${newJobData.timezone_note||''}" oninput="setJobText('timezone_note',this.value)"></div>`;
-  if(type==='Hybrid') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Minimum days in the office</div>${jobChipSelect('hybrid_min_days',['1 day/week','2 days/week','3 days/week','4 days/week'])}`;
+  if(type==='Hybrid') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Minimum days in the office</div>${jobChipSelect('hybrid_min_days',['1 day/week','2 days/week','3 days/week','4 days/week'])}<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. Madrid, Spain','office_location')}`;
   if(type==='On-site') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. Madrid, Spain','office_location')}`;
  }); return out;
 }
@@ -7185,7 +7192,7 @@ function jobFormStepBody(d, step) {
       ${companyLogoFieldHTML()}
       <div class="field" style="padding:0;${askCompanyLogo && !d.id ? 'margin-top:18px' : ''}"><label>Job title</label><input placeholder="e.g. Senior Frontend Engineer" value="${d.title||''}" oninput="setJobText('title', this.value)" /></div>
       <div class="field" style="padding:0;margin-top:18px"><label>Team / department</label><input placeholder="e.g. Engineering" value="${d.department||''}" oninput="setJobText('department', this.value)" /></div>
-      <div class="onb-field-label" style="margin-left:0">Job function</div><div class="field" style="padding:0">${domainSelectHTML(d.domain_id, "setJob('domain_id',this.value)")}</div><div class="field-help" style="margin-top:6px">This keeps skills, tools and recommendations relevant to the role instead of showing generic options.</div>
+      <div class="onb-field-label" style="margin-left:0">Job function</div><div class="field" style="padding:0">${domainSelectHTML(d.domain_id)}</div>
       <div class="onb-field-label" style="margin-left:0">Employment type</div>
       ${jobChipMulti('employment_type', ['Full-time','Part-time','Contract','Internship','Freelance'])}
       <div class="onb-field-label" style="margin-left:0">Contract type</div>
@@ -7233,7 +7240,6 @@ function jobFormStepBody(d, step) {
 
   if (step === 5) return `
       <div class="onb-step-label" style="padding:8px 0 8px">5. Skills & culture</div>
-      <div class="field-help" style="margin-bottom:10px">Suggestions are tailored to <b>${taxonomyDomainLabel(selectedJobDomain(d))||'this job function'}</b>. Mutch normalises aliases and close terminology, so candidates are not penalised for using a different but equivalent label.</div>
       <div class="onb-field-label" style="margin-left:0;margin-top:8px">Must-have skills</div>
       ${jobChipMulti('skills', jobWithCustom('skills', taxonomySuggestions(selectedJobDomain(d),'skill',16)))}
       ${jobCustomAddRow('skills', 'Add a must-have skill…', true)}
@@ -7440,7 +7446,9 @@ function publishNewJob() {
     goTo('jobs');
   } else {
     const wasFirstJob = freshRecruiterOnboarding;
-    RECRUITER_JOBS.unshift({ ...d, id: 'p'+Date.now(), status: 'active', applicants: 0, matches: 0, posted: 'Today', company_logo: COMPANY_PROFILE.logo_url || '' });
+    const newId='p'+Date.now();
+    RECRUITER_JOBS.unshift({ ...d, id: newId, status: 'active', applicants: 0, matches: 0, posted: 'Today', company_logo: COMPANY_PROFILE.logo_url || '' });
+    discoverJobId=newId; deckIndex=0; lowerCompatShown=false;
     askCompanyLogo = false;
     freshRecruiterOnboarding = false;
     closeDetail();
@@ -7900,7 +7908,8 @@ function bestConceptMatch(required,owned,type='skill'){let best=0,bestLabel='';f
 function inferDomainFromText(...vals){const txt=normText(vals.flat().filter(Boolean).join(' '));let best=null,bestScore=0;for(const [did,d] of Object.entries(MUTCH_TAXONOMY.domains)){let score=0;for(const word of normText(d.en).split(' '))if(word.length>3&&txt.includes(word))score++;for(const type of ['skill','tool'])for(const [eid,p] of (MUTCH_TAXONOMY.relations[type][did]||[]).slice(0,20)){const label=normText(taxonomyEntityLabel(type,eid));if(label&&txt.includes(label))score+=p?2:1}if(score>bestScore){bestScore=score;best=did}}return best}
 function selectedCandidateDomain(){const f=Array.isArray(onboardData?.work_field)?onboardData.work_field[0]:onboardData?.work_field;return taxonomyDomainId(f)||inferDomainFromText(onboardData?.primary_role,f)}
 function selectedJobDomain(d=newJobData){return taxonomyDomainId(d?.domain_id)||inferDomainFromText(d?.department,d?.title,COMPANY_PROFILE?.industry)}
-function domainSelectHTML(value,onchange){const current=taxonomyDomainId(value)||'';return `<select class="flat-input" onchange="${onchange}"><option value="">Select a job function…</option>${taxonomyDomainOptions().map(o=>`<option value="${o.id}" ${current===o.id?'selected':''}>${o.label}</option>`).join('')}</select>`}
+function domainSelectHTML(value){const opts=taxonomyDomainOptions();const current=taxonomyDomainId(value)||'';const label=(opts.find(o=>o.id===current)||{}).label||'';return nxSelectHTML('job-function-select','Job function',opts.map(o=>o.label),label,'Select a job function…','pickJobDomain')}
+function pickJobDomain(i){const o=taxonomyDomainOptions()[i];if(!o)return;newJobData.domain_id=o.id;renderNewJobForm()}
 function educationRank(v){const n=normText(v);if(!n||n.includes('no degree'))return 0;if(n.includes('bootcamp')||n.includes('certif'))return 1;if(n.includes('bachelor')||n.includes('bsc')||n.includes('ba '))return 2;if(n.includes('master')||n.includes('msc')||n.includes('mba'))return 3;if(n.includes('phd')||n.includes('doctor'))return 4;return 0}
 function languageRank(v){const n=normText(v);if(n.includes('c2')||n.includes('native'))return 6;if(n.includes('c1')||n.includes('advanced'))return 5;if(n.includes('b2'))return 4;if(n.includes('b1')||n.includes('intermediate'))return 3;if(n.includes('a2'))return 2;if(n.includes('a1')||n.includes('basic'))return 1;return 0}
 function parseMoney(v){const m=String(v||'').replace(/\s/g,'').match(/([\d.,]+)\s*k?/i);if(!m)return null;let raw=m[1],num;if(raw.includes(',')&&raw.includes('.'))num=parseFloat(raw.replace(/,/g,''));else if((raw.match(/,/g)||[]).length===1&&raw.split(',')[1]?.length<=2)num=parseFloat(raw.replace(',','.'));else num=parseFloat(raw.replace(/[,.]/g,''));if(/k/i.test(m[0]))num*=1000;return Number.isFinite(num)?num:null}
@@ -7911,12 +7920,12 @@ function candidateSetups(c){const w=Array.isArray(c.work_setup)?c.work_setup:[c.
 function jobSkills(job){return job.skills||job.tags||[]}
 function jobNiceSkills(job){return job.nice_skills||[]}
 function candidateTools(c){return c.tools||[]}
-function candidateYears(c){const n=parseFloat(c.years_experience||c.experience_years||'');return Number.isFinite(n)?n:null}
+function candidateYears(c){let n=parseFloat(c.years_experience||c.experience_years||'');if(Number.isFinite(n))return n;const texts=[c.summary,c.bio,...(c.experience||[]).flatMap(x=>[x.duration,x.summary,x.responsibilities]),...(c.work_story||[]).flatMap(x=>[x.summary,x.responsibilities])].filter(Boolean).join(' ');const vals=[...texts.matchAll(/(\d+(?:\.\d+)?)\s*(?:yrs?|years?)/ig)].map(m=>parseFloat(m[1])).filter(Number.isFinite);return vals.length?Math.max(...vals):null}
 function requiredYears(job){const n=parseFloat(job.years_experience||'');return Number.isFinite(n)?n:null}
 function candidateEducation(c){if(c.education_level)return c.education_level;const e=Array.isArray(c.education)?c.education[0]:c.education;return e?.title||e||''}
 function explicitTimezoneCompatible(job,c){let req=job.timezone_req||[];if(!Array.isArray(req))req=[req];if(!req.length){const label=jobTimezoneLabel(job);req=label?[label]:[]}if(!req.length||req.some(x=>/any timezone/i.test(x)))return true;let tz=Array.isArray(c.timezone_pref)?c.timezone_pref:[c.timezone_pref].filter(Boolean);if(!tz.length&&/timezone/i.test(c.work_setup||''))tz=[c.work_setup];if(!tz.length||tz.some(x=>/flexible|any/i.test(x)))return true;return req.some(r=>tz.some(t=>{const rn=normText(r),tn=normText(t);return (rn.includes('americas')&&tn.includes('americas'))||(rn.includes('europe')&&tn.includes('europe'))||(rn.includes('asia')&&tn.includes('asia'))||(rn.includes('middle east')&&tn.includes('middle east'))||(rn.includes('within 3h'));}))}
 function workAuthorizationCompatible(job,c){const visa=job.visa;if(!visa)return true;const auth=c.work_authorization||'';if(visa==='We sponsor visas')return true;if(auth==='No restrictions')return true;if(auth==='Needs sponsorship')return false;const loc=normText((job.office_location||job.location||'')+' '+(job.work_locations||[]).join(' '));if(visa==='Citizens/residents only'){if(auth==='EU only'&&/(europe|eu |spain|france|germany|portugal|italy|netherlands)/.test(loc))return true;if(auth==='US only'&&/(united states|us |usa|new york|san francisco|austin)/.test(loc))return true;return !loc;}return true}
-function languageCompatibility(job,c){const req=job.languages||[];if(!req.length)return{ok:true,score:1,matched:[]};let total=0,matched=[];for(const l of req){const owned=(c.languages||[]).find(x=>normText(x)===normText(l));if(!owned)continue;const need=languageRank(job.language_levels?.[l]),have=languageRank(c.language_levels?.[owned]);if(!need||!have||have>=need){total++;matched.push(l)}}return{ok:total===req.length,score:total/req.length,matched}}
+function languageCompatibility(job,c){const req=job.languages||[];if(!req.length)return{ok:true,score:1,matched:[]};let total=0,matched=[];for(const l of req){const ln=normText(l);const owned=(c.languages||[]).find(x=>{const xn=normText(x);return xn===ln||xn.startsWith(ln+' ')||xn.startsWith(ln+' (')});if(!owned)continue;const need=languageRank(job.language_levels?.[l]||l);const have=languageRank(c.language_levels?.[l]||c.language_levels?.[owned]||owned);if(!need||!have||have>=need){total++;matched.push(l)}}return{ok:total===req.length,score:total/req.length,matched}}
 function roleRelevance(job,c){const jd=taxonomyDomainId(job.domain_id)||inferDomainFromText(job.title,job.department,...jobSkills(job));const cfields=Array.isArray(c.work_field)?c.work_field:[c.work_field].filter(Boolean);const cds=cfields.map(taxonomyDomainId).filter(Boolean);const cd=cds[0]||inferDomainFromText(c.headline,c.primary_role,...(c.skills||[]));let score=(jd&&cd&&jd===cd)?1:(jd&&cd?0.25:0.6);const jt=normText(job.title),ct=normText(c.headline||c.primary_role);const tok=tokenSimilarity(jt,ct);return Math.max(score,tok>=.66?1:tok>=.4?.75:score)}
 function candidateSkillPool(c){const declared=[...(c.skills||[])];const text=normText([c.headline,c.primary_role,c.bio,...(c.work_story||[]).flatMap(x=>[x.role,x.summary,x.responsibilities]),...(c.projects||[]).flatMap(x=>[x.title,x.description,x.results,x.kpis])].filter(Boolean).join(' '));const inferred=[];for(const [id,e] of Object.entries(MUTCH_TAXONOMY.entities.skill)){const labels=[e.en,e.es,e.fr,...MUTCH_TAXONOMY.aliases.filter(a=>a[0]==='skill'&&a[1]===id).map(a=>a[2])].filter(Boolean);if(labels.some(l=>{const n=normText(l);return n.length>=3&&(' '+text+' ').includes(' '+n+' ')}))inferred.push(e.en)}return [...new Set([...declared,...inferred])]}
 function skillCoverage(job,c){const must=jobSkills(job),nice=jobNiceSkills(job),owned=candidateSkillPool(c);const evalSet=(arr,strict)=>{if(!arr.length)return{score:1,details:[]};let sum=0,details=[];for(const r of arr){const m=bestConceptMatch(r,owned,'skill');const credit=m.score>=.82?m.score:(!strict&&m.score>=.3?m.score:0);sum+=credit;details.push({required:r,match:m.label,credit})}return{score:sum/arr.length,details}};return{must:evalSet(must,true),nice:evalSet(nice,false)}}
@@ -7934,7 +7943,7 @@ function mutualMatch(job,c=CANDIDATE_PROFILE){
  if(c.employment_types?.length&&job.employment_type){const je=Array.isArray(job.employment_type)?job.employment_type:[job.employment_type];if(!je.some(x=>c.employment_types.includes(x)))blockers.push('Employment type is outside the candidate preferences')}
  const skills=skillCoverage(job,c),role=roleRelevance(job,c),exp=experienceCompatibility(job,c),edu=educationCompatibility(job,c),tools=toolCoverage(job,c);
  const recruiterFit=100*(.22*role+.28*skills.must.score+.07*skills.nice.score+.16*exp+.08*edu+.07*tools+.12*lang.score);
- const salaryFit=!cmin||!salary.max?.8:(salary.max>=cmin?1:0);const setupFit=!cs.length?.75:(cs.some(x=>js.includes(x))?1:0);const culture=cultureCompatibility(job,c),size=companySizeCompatibility(c);
+ const salaryFit=(!cmin||!salary.max)?0.8:(salary.max>=cmin?1:0);const setupFit=(!cs.length||!js.length)?0.75:(cs.some(x=>js.includes(x))?1:0);const culture=cultureCompatibility(job,c),size=companySizeCompatibility(c);
  const candidateFit=100*(.32*salaryFit+.25*setupFit+.16*culture+.10*size+.09*(explicitTimezoneCompatible(job,c)?1:0)+.08*(workAuthorizationCompatible(job,c)?1:0));
  let mutual=(recruiterFit>0&&candidateFit>0)?2*recruiterFit*candidateFit/(recruiterFit+candidateFit):0;if(blockers.length)mutual=Math.min(mutual,49);
  if(role>=.8)reasons.push('Role and professional field align');if(skills.must.score>=.8)reasons.push(`${Math.round(skills.must.score*100)}% of core skills matched`);if(exp>=1&&requiredYears(job))reasons.push('Experience requirement met');if(edu>=1&&job.education_level)reasons.push('Education requirement met');if(lang.score===1&&(job.languages||[]).length)reasons.push('Language requirements met');if(salaryFit===1&&cmin&&salary.max)reasons.push('Salary range meets the candidate minimum');if(setupFit===1)reasons.push('Work setup is compatible');
@@ -9671,7 +9680,7 @@ candStepBody=function(i){let html=_candStepBody(i);if(i===0)html+=`<div class="o
 const _recStepBody=recStepBody;
 recStepBody=function(i){
   let html=_recStepBody(i);
-  if(i===0) html+=`<div class="onb-field-label">Company website <span class="required-mark">*</span></div><div class="onb-block"><input id="company-website-onb" placeholder="https://yourcompany.com" value="${onboardData.website||''}" oninput="setOnbText('website',this.value)"></div><div class="website-help">We use your website to understand your company, product and context so candidates can make a better-informed decision about the opportunity.</div>`;
+  if(i===0) html+=`<div class="onb-field-label">Company website <span class="required-mark">*</span></div><div class="onb-block"><input id="company-website-onb" placeholder="https://yourcompany.com" value="${onboardData.website||''}" oninput="setOnbText('website',this.value)"><div class="website-help">We use your website to understand your company, product and context so candidates can make a better-informed decision about the opportunity.</div></div>`;
   return html;
 };
 const _validateOnboardStep=validateOnboardStep;
