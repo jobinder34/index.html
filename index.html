@@ -1402,6 +1402,9 @@
   .rs-copy b { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.02; letter-spacing: -0.02em; }
   .rs-copy small { font-family: var(--font-body); font-size: 13.5px; line-height: 1.4; color: rgba(255,255,255,0.86); }
   .rs-stage[data-choice] .rs-panel[aria-checked="false"] .rs-copy { opacity: 0; }
+  .rs-panel.rs-copy-tight .rs-copy { opacity: 0 !important; visibility: hidden; transform: translateY(5px); }
+  .rs-copy { visibility: visible; transform: translateY(0); transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s; }
+  .rs-panel:not(.rs-copy-tight) .rs-copy { transition: opacity .18s ease, transform .18s ease, visibility 0s; }
   .rs-check { position: absolute; top: 14px; right: 14px; z-index: 1; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #FFFFFF; transform: scale(0); transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
   .rs-check .icon { width: 16px; height: 16px; }
   .rs-panel[aria-checked="true"] .rs-check { transform: scale(1); }
@@ -5615,12 +5618,21 @@ function renderRoleSelect() {
     </div>`;
   initRoleSwipe();
 }
+function updateRoleCopyVisibility(stage) {
+  if (!stage) return;
+  stage.querySelectorAll('.rs-panel').forEach(panel => {
+    // Hide the copy before the panel becomes too narrow to keep its typography intact.
+    const tooNarrow = panel.getBoundingClientRect().width < 154;
+    panel.classList.toggle('rs-copy-tight', tooNarrow);
+  });
+}
 function chooseRole(role) {
   roleChoice = role;
   const stage = document.getElementById('rs-stage');
   if (!stage) return;
   stage.style.setProperty('--split', ROLE_SPLIT[role || 'none']);
   stage.dataset.choice = role || '';
+  requestAnimationFrame(() => updateRoleCopyVisibility(stage));
   stage.querySelectorAll('.rs-panel').forEach(p => p.setAttribute('aria-checked', String(p.dataset.role === role)));
   const hint = stage.querySelector('.rs-hint');
   if (hint) hint.textContent = role ? 'Swipe to switch' : 'Swipe to choose';
@@ -5637,6 +5649,7 @@ function initRoleSwipe() {
     if (Math.abs(dx) > 6) moved = true;
     const split = Math.max(18, Math.min(82, startSplit + dx / stage.clientWidth * 100));
     stage.style.setProperty('--split', split);
+    updateRoleCopyVisibility(stage);
   };
   const up = () => {
     if (!dragging) return;
@@ -5646,6 +5659,8 @@ function initRoleSwipe() {
     const split = parseFloat(stage.style.getPropertyValue('--split'));
     chooseRole(split >= 58 ? 'candidate' : split <= 42 ? 'recruiter' : roleChoice);
   };
+  updateRoleCopyVisibility(stage);
+  window.addEventListener('resize', () => updateRoleCopyVisibility(stage));
   stage.addEventListener('pointerdown', (e) => { down(e.clientX); });
   window.addEventListener('pointermove', (e) => move(e.clientX));
   window.addEventListener('pointerup', up);
