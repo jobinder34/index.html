@@ -5349,26 +5349,21 @@ function openChangeEmail() {
   document.getElementById('detail-overlay').classList.add('show');
 }
 function saveNewEmail() {
-  const input = document.getElementById('new-email-input');
-  const val = input.value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { document.getElementById('new-email-error').textContent = 'Enter a valid email address'; return; }
-  const isCandidate = app === 'candidate';
-  const p = resolveProfileObj(isCandidate ? 'CANDIDATE_PROFILE' : 'COMPANY_PROFILE');
-  const oldEmail = p.email;
-  p.email = val;
-  const accounts = loadAccounts();
-  const acc = accounts.find(a => a.email.toLowerCase() === (oldEmail||'').toLowerCase());
-  if (acc) { acc.email = val; acc.profile.email = val; saveAccounts(accounts); }
-  closeDetail();
-  showToast('Email updated');
-  openSettings();
+  const input=document.getElementById('new-email-input'); const val=(input?.value||'').trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){document.getElementById('new-email-error').textContent='Enter a valid email address';return;}
+  const p=resolveProfileObj(app==='candidate'?'CANDIDATE_PROFILE':'COMPANY_PROFILE'); const old=p.email||''; p.email=val;
+  const accounts=loadAccounts(); let acc=accounts.find(a=>(a.email||'').toLowerCase()===old.toLowerCase());
+  if(!acc){acc={email:val,password:'',role:app,profile:p};accounts.push(acc);}else{acc.email=val;acc.profile=acc.profile||p;acc.profile.email=val;} saveAccounts(accounts);
+  closeDetail();showToast('Email updated');openSettings();
 }
 function openChangePassword() {
   document.getElementById('detail-overlay').innerHTML = `
     <div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Change password</div></div>
     <div class="detail-body">
       <div class="field" style="padding:0"><label>Current password</label>${passwordFieldHTML('cur-pass-input','Current password')}<div class="field-error" id="cur-pass-error"></div></div>
+      <button class="text-btn" style="margin:10px 0 2px;padding:0;color:var(--highlight);font-weight:700" onclick="recoverPasswordFromSettings()">Forgot your current password?</button>
       <div class="field" style="padding:0;margin-top:14px"><label>New password</label>${passwordFieldHTML('new-pass-input','At least 8 characters')}<div class="field-error" id="new-pass-error"></div></div>
+      <div class="field" style="padding:0;margin-top:14px"><label>Confirm new password</label>${passwordFieldHTML('confirm-pass-input','Repeat new password')}<div class="field-error" id="confirm-pass-error"></div></div>
       <button class="btn btn-full" style="margin-top:16px" onclick="saveNewPassword()">${icon('check')} Save password</button>
     </div>`;
   document.getElementById('detail-overlay').classList.add('show');
@@ -5376,19 +5371,29 @@ function openChangePassword() {
 function saveNewPassword() {
   document.getElementById('cur-pass-error').textContent = '';
   document.getElementById('new-pass-error').textContent = '';
+  document.getElementById('confirm-pass-error').textContent = '';
   const isCandidate = app === 'candidate';
   const p = resolveProfileObj(isCandidate ? 'CANDIDATE_PROFILE' : 'COMPANY_PROFILE');
   const cur = document.getElementById('cur-pass-input').value;
   const next = document.getElementById('new-pass-input').value;
+  const confirm = document.getElementById('confirm-pass-input').value;
   const accounts = loadAccounts();
   const acc = accounts.find(a => a.email.toLowerCase() === (p.email||'').toLowerCase());
   if (!acc || acc.password !== cur) { document.getElementById('cur-pass-error').textContent = 'Current password is incorrect'; return; }
   if (!next || next.length < 8) { document.getElementById('new-pass-error').textContent = 'Password must be at least 8 characters'; return; }
+  if (next !== confirm) { document.getElementById('confirm-pass-error').textContent = 'Passwords do not match'; return; }
   acc.password = next;
   saveAccounts(accounts);
   closeDetail();
   showToast('Password updated');
   openSettings();
+}
+function recoverPasswordFromSettings() {
+  const p = resolveProfileObj(app === 'candidate' ? 'CANDIDATE_PROFILE' : 'COMPANY_PROFILE');
+  const email = (p.email || '').trim();
+  if (!email) { showToast('Add an email address first'); return; }
+  // Prototype recovery flow: mirrors a real reset-email action without exposing credentials.
+  showToast(`Password reset instructions sent to ${email}`);
 }
 function downloadMyData() {
   const isCandidate = app === 'candidate';
@@ -5477,7 +5482,7 @@ function menuNav(action) {
   document.getElementById('calendar-overlay').classList.remove('show');
   document.getElementById('menu-overlay').classList.remove('show');
   action();
-  menuReturn = true;
+  menuReturn = false;
   requestAnimationFrame(addMenuButtonToOpenPage);
 }
 function addMenuButtonToOpenPage() {
@@ -5748,7 +5753,7 @@ function phoneInputHTML(value, targetExpr, inputId=''){
   const sid=`phone-prefix-${inputId||targetExpr.replace(/[^a-z0-9]+/gi,'-')}`;
   const current=PHONE_PREFIXES.find(([,label])=>label.endsWith(' '+p.prefix))?.[1]||'🇫🇷 +33';
   const opts=PHONE_PREFIXES.map(([,label],i)=>`<div class="autocomplete-item ${label===current?'is-selected':''}" role="option" aria-selected="${label===current}" onclick="event.stopPropagation(); pickPhonePrefix('${sid}',${i},'${targetExpr.replace(/'/g,"\\'")}')">${label}</div>`).join('');
-  return `<div class="phone-input-row"><div class="dj-select nx-select phone-prefix-select" id="${sid}" data-prefix="${p.prefix}"><button type="button" class="dj-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Country calling code: ${current}" onclick="toggleNxSelect(event,'${sid}')"><span class="dj-label">${current}</span>${icon('back')}</button><div class="autocomplete-list dj-menu" role="listbox">${opts}</div></div><input${id} class="flat-input phone-number" type="tel" inputmode="tel" placeholder="6 12 34 56 78" value="${p.local}" oninput="updatePhoneValue('${sid}','${targetExpr.replace(/'/g,"\\'")}',this.value)" /></div>`;
+  return `<div class="phone-input-row"><div class="dj-select nx-select phone-prefix-select" id="${sid}" data-prefix="${p.prefix}"><button type="button" class="dj-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Country calling code: ${current}" onclick="toggleNxSelect(event,'${sid}')"><span class="dj-label">${current}</span>${icon('back')}</button><div class="autocomplete-list dj-menu" role="listbox">${opts}</div></div><input${id} class="flat-input phone-number" type="tel" inputmode="tel" placeholder="(0)6 12 34 56 78" value="${p.local}" oninput="updatePhoneValue('${sid}','${targetExpr.replace(/'/g,"\\'")}',this.value)" /></div>`;
 }
 function setPhoneExpr(targetExpr,value){ try{ eval(`${targetExpr} = ${JSON.stringify(value)}`); }catch(e){ console.warn('Phone field update failed',e); } }
 function updatePhoneValue(selectId,targetExpr,local){
@@ -6299,7 +6304,7 @@ function ensureJobAwareTestCandidates(job) {
     CANDIDATES.push({
       id,name:`${namesA[n%namesA.length]} ${namesB[(n*5)%namesB.length]}`,
       headline:titleVariants[n%titleVariants.length],primary_role:titleVariants[n%titleVariants.length],location:job.office_location||job.location||'Remote',
-      applied:false,salary:`€${Math.round(minSalary/1000)}k min · EUR`,min_salary_amount:String(minSalary),min_salary_currency:'EUR',
+      applied:false,salary:`${Math.round(minSalary/1000)}K€ min`,min_salary_amount:String(minSalary),min_salary_currency:'EUR',
       work_setup:workSetup,timezone_pref:tz,available_from:`${String(1+(n%27)).padStart(2,'0')}/${String(10+(n%3)).padStart(2,'0')}/2026`,
       notice_period:n%3===0?'Yes':'No',notice_period_detail:n%3===0?'4 weeks':'',skills,tools,
       languages:mkLangs(band==='strong'?(['C2','C1','B2','C1'][n%4]):band==='medium'?(['C1','B2','B1'][n%3]):(['B1','A2','B2'][n%3])),field:domainLabel,work_field:[domainLabel],domain_id:did||'',
@@ -6729,7 +6734,7 @@ function openMatch(item) {
     <div class="match-figures">
       <span class="match-burst" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<i style="--a:${i * 22.5 + (i % 2 ? 8 : 0)}deg;--d:${110 + (i % 3) * 38}px"></i>`).join('')}</span>
       ${mutchMarkSVG('match-lens-anim')}
-      <div class="match-title-mvp">It&rsquo;s a Mutch</div>
+      <div class="match-title-mvp">It&rsquo;s a Mutch!</div>
     </div>
     <div class="match-sub">${app === 'candidate' ? `${item.company} selected you from among their applicants — this isn't a random swipe, you already knew each other.` : `${item.name} had already applied — that's why the match could happen.`}</div>
     <div class="match-note">${icon('clock')} ${app === 'candidate' ? `This company has <b>7 days</b> to respond to you. If they don't, we'll close the application and let you know.` : `You have <b>7 days</b> to respond. If the deadline passes with no response, the application closes and it may affect your response-rate stats.`}</div>
@@ -7238,7 +7243,8 @@ function jobCustomAddRow(key, placeholder, multi) {
   const inputId = 'job-custom-' + key;
   return `<div style="display:flex;gap:8px;margin-top:8px">
       <input id="${inputId}" class="flat-input" placeholder="${placeholder}" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addJobCustomChip('${key}','${inputId}',${!!multi});}" />
-      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addJobCustomChip('${key}','${inputId}',${!!multi})">${icon('plus')}</button>
+      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addJobCustomChip('${key}','${inputId}',${!!multi})">Add</button>
+      <div class="add-helper">Type your option, then tap <b>Add</b> or press Enter.</div>
     </div>`;
 }
 function addJobCustomChip(key, inputId, multi) {
@@ -7304,17 +7310,28 @@ function moveHiringStep(i, dir) {
   renderNewJobForm();
 }
 function hiringStepRowHTML(s,i){
- const step=typeof s==='object'?s:{text:s,duration:'30 min'}, total=(newJobData.hiring_process||[]).length;
+ const step=typeof s==='object'?s:{text:s,duration:'30 min'};
  const presets=['Screening call','Interview with manager','Case study','Presentation','Interview with the CEO','References call','Decision and offer'];
- const noTime=['Case study','References call','Decision and offer'].includes(step.text); const times=['15 min','30 min','45 min','1 hour','1 h 15 min','1 h 30 min','2 hours'];
- return `<div class="hiring-step-row"><div class="hiring-step-reorder"><button class="hiring-step-arrow" onclick="moveHiringStep(${i},-1)" ${i===0?'disabled':''}>${icon('chevronup')}</button><span class="hiring-step-num">${i+1}</span><button class="hiring-step-arrow" onclick="moveHiringStep(${i},1)" ${i===total-1?'disabled':''}>${icon('chevrondown')}</button></div><div class="hiring-step-fields"><select class="flat-input hiring-step-input" onchange="editHiringStep(${i},this.value);if(['Case study','References call','Decision and offer'].includes(this.value))editHiringStepDuration(${i},'');renderNewJobForm()"><option value="">Custom step…</option>${presets.map(x=>`<option ${step.text===x?'selected':''}>${x}</option>`).join('')}${step.text&&!presets.includes(step.text)?`<option selected>${step.text}</option>`:''}</select>${noTime?'':`<select class="flat-input hiring-step-duration" onchange="editHiringStepDuration(${i},this.value)">${times.map(t=>`<option ${step.duration===t?'selected':''}>${t}</option>`).join('')}</select>`}</div><button class="hiring-step-remove" onclick="removeHiringStep(${i})">${icon('x')}</button></div>`;
+ const noTime=['Case study','References call','Decision and offer'].includes(step.text);
+ const isCustom=!!step.custom || (!!step.text && !presets.includes(step.text));
+ const selectId='hire-step-select-'+i;
+ return `<div class="hiring-step-row drag-hiring-row" draggable="true" data-hiring-index="${i}" ondragstart="hiringDragStart(event,${i})" ondragover="hiringDragOver(event)" ondrop="hiringDrop(event,${i})" ondragend="hiringDragEnd(event)">
+   <div class="hiring-drag-handle" aria-label="Drag to reorder">⋮⋮</div>
+   <div class="hiring-step-num">${i+1}</div>
+   <div class="hiring-step-fields">
+     ${nxSelectHTML(selectId,'Hiring step',[...presets,'Custom step'],isCustom?'Custom step':step.text,'Choose a step…','pickHiringStep')}
+     ${isCustom?`<input class="flat-input hiring-custom-input" placeholder="Write your custom step…" value="${String(step.text||'').replace(/"/g,'&quot;')}" oninput="editHiringStep(${i},this.value)">`:''}
+     ${noTime?'':timeWheelHTML(i,step.duration||'30 min')}
+   </div>
+   <button class="hiring-step-remove" onclick="removeHiringStep(${i})">${icon('x')}</button>
+ </div>`;
 }
 function jobWorkSetupDetail() {
  const setup=newJobData.work_setup||[]; let out='';
  setup.forEach(type=>{
   if(type==='Remote') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Timezone requirement</div>${jobChipMulti('timezone_req',['Any timezone','UTC-8 to UTC-5 (Americas)','UTC+0 to UTC+2 (Europe/Africa)','UTC+3 to UTC+6 (Middle East/S. Asia)','UTC+7 to UTC+10 (Asia/Pacific)','Within 3h of the team'])}<div class="field" style="padding:0;margin-top:10px"><input class="flat-input" placeholder="Other / additional detail (optional)" value="${newJobData.timezone_note||''}" oninput="setJobText('timezone_note',this.value)"></div>`;
-  if(type==='Hybrid') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Minimum days in the office</div>${jobChipSelect('hybrid_min_days',['1 day/week','2 days/week','3 days/week','4 days/week'])}<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. Madrid, Spain','office_location')}`;
-  if(type==='On-site') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. Madrid, Spain','office_location')}`;
+  if(type==='Hybrid') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Minimum days in the office</div>${jobChipSelect('hybrid_min_days',['1 day/week','2 days/week','3 days/week','4 days/week'])}<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. 24 Rue de Rivoli, Paris, France','office_location')}<div class="office-location-help">Start typing a city or full street address. You can keep any exact address you type, even if it is not in the suggestions.</div>`;
+  if(type==='On-site') out+=`<div class="onb-field-label" style="margin-left:0;margin-top:24px">Office location</div>${autocompleteFieldHTML('office_location',newJobData.office_location,'e.g. 24 Rue de Rivoli, Paris, France','office_location')}<div class="office-location-help">Start typing a city or full street address. You can keep any exact address you type, even if it is not in the suggestions.</div>`;
  }); return out;
 }
 let jobFormStep = 0;
@@ -7363,7 +7380,9 @@ function jobFormStepBody(d, step) {
       <div class="onb-field-label" style="margin-left:0;margin-top:24px">Is a specific field of study required? <span style="color:var(--muted);font-weight:500">(optional)</span></div>
       ${jobChipSelect('field_of_study_required', ['No','Yes'])}
       ${d.field_of_study_required === 'Yes' ? `<div class="field" style="padding:0;margin-top:12px">
-        ${nxSelectHTML('fos-select', 'Field of study', FIELD_OF_STUDY_OPTIONS.filter(x=>x!=='Any / not specific'), d.field_of_study, 'Select the required field of study…', 'pickFieldOfStudy')}
+        ${nxSelectHTML('fos-select', 'Field of study', [...new Set([...FIELD_OF_STUDY_OPTIONS.filter(x=>x!=='Any / not specific'), ...(d.field_of_study_custom||[])])], d.field_of_study, 'Select the required field of study…', 'pickFieldOfStudy')}
+        <div class="field-helper" style="margin-top:10px">Don’t see the field you need? Add it below.</div>
+        <div class="smart-add-row"><input id="custom-field-study" class="flat-input" placeholder="Add another field of study…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomFieldStudy()}"><button type="button" class="smart-add-btn" onclick="addCustomFieldStudy()">Add</button></div>
       </div>` : ''}`;
 
   if (step === 4) return `
@@ -7378,7 +7397,7 @@ function jobFormStepBody(d, step) {
 
   if (step === 5) return `
       <div class="onb-step-label" style="padding:8px 0 8px">5. Skills & culture</div>
-      <div class="onb-field-label" style="margin-left:0;margin-top:8px">Must-have skills</div>
+      <div class="onb-field-label" style="margin-left:0;margin-top:8px">Must-have skills</div><div class="field-helper">Keep this focused: we recommend no more than <b>8 must-haves</b>. Too many hard requirements can hide otherwise strong candidates.</div>
       ${jobChipMulti('skills', jobWithCustom('skills', taxonomySuggestions(selectedJobDomain(d),'skill',16)))}
       ${jobCustomAddRow('skills', 'Add a must-have skill…', true)}
       <div class="onb-field-label" style="margin-left:0;margin-top:24px">Nice-to-have skills</div>
@@ -7427,11 +7446,11 @@ function jobFormStepBody(d, step) {
   if (step === 8) return `
       <div class="onb-step-label" style="padding:8px 0 8px">8. Description</div>
       <div class="field" style="padding:0"><label>Role summary</label><textarea rows="4" placeholder="What will this person actually do day to day?" oninput="setJobText('summary', this.value)">${d.summary||''}</textarea></div>
-      <div class="field" style="padding:0;margin-top:18px"><label>Key responsibilities</label>${responsibilitiesArray().map((r,i)=>`<div class="responsibility-row"><input class="flat-input" value="${r}" oninput="editResponsibility(${i},this.value)"><button class="hiring-step-remove" onclick="removeResponsibility(${i})">${icon('x')}</button></div>`).join('')}<div style="display:flex;gap:8px;margin-top:8px"><input id="responsibility-input" class="flat-input" placeholder="Add a responsibility…" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addResponsibility()}"><button class="attach-btn" style="width:auto;padding:0 14px" onclick="addResponsibility()">${icon('plus')}</button></div></div>`;
+      <div class="field" style="padding:0;margin-top:18px"><label>Key responsibilities</label><div class="field-helper" style="margin:0 0 10px">Aim for <b>10 or fewer</b> clear responsibilities so candidates can scan the role quickly.</div>${responsibilitiesArray().map((r,i)=>`<div class="responsibility-row"><input class="flat-input" value="${r}" oninput="editResponsibility(${i},this.value)"><button class="hiring-step-remove" onclick="removeResponsibility(${i})">${icon('x')}</button></div>`).join('')}<div style="display:flex;gap:8px;margin-top:8px"><input id="responsibility-input" class="flat-input" placeholder="Add a responsibility…" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addResponsibility()}"><button class="attach-btn" style="width:auto;padding:0 14px" onclick="addResponsibility()">${icon('plus')}</button></div></div>`;
 
   if (step === 9) return `
       <div class="onb-step-label" style="padding:8px 0 8px">9. Hiring process</div>
-      <div class="onb-field-label" style="margin-left:0;margin-top:0">Use the arrows to reorder, tap text to edit</div>
+      <div class="onb-field-label" style="margin-left:0;margin-top:0">Drag steps to reorder. Choose a standard step or write your own.</div>
       <div>
         ${(d.hiring_process||[]).map((s,i)=>hiringStepRowHTML(s,i)).join('')}
       </div>
@@ -7442,11 +7461,12 @@ function jobFormStepBody(d, step) {
 
   return `
       <div class="onb-step-label" style="padding:8px 0 8px">10. Response commitment</div>
-      <div class="match-note" style="margin:0 0 12px">${icon('clock')} How long do you commit to responding to a candidate after matching on this role?</div><div class="sla-help">This is the time candidates wait for a first response. Shorter commitments create a better candidate experience and are valued more highly in Mutch.</div>
+      <div class="onb-field-label" style="margin-left:0;margin-top:0">How long do you commit to responding after a match?</div>
       <div class="chip-row">
         <span class="chip ${!d._customSla?'on':''}" onclick="setJobText('_customSla', false); setJobText('sla_days', String(COMPANY_PROFILE.sla_days)+' days'); renderNewJobForm()">Use my company default (${COMPANY_PROFILE.sla_days} days)</span>
         <span class="chip ${d._customSla?'on':''}" onclick="setJobText('_customSla', true); renderNewJobForm()">Set a specific commitment for this role</span>
       </div>
+      <div class="sla-important-note">${icon('alert')} <b>Tip:</b> a shorter response commitment gives candidates clarity faster and strengthens your response experience.</div>
       ${d._customSla ? `
       <div class="onb-field-label" style="margin-left:0;margin-top:14px">Response time for this role</div>
       ${jobChipSelect('sla_days', ['3 days','5 days','7 days','10 days','14 days','21 days','30 days'])}
@@ -7722,6 +7742,9 @@ function downloadCandidateCvPdf(name) {
     .match-note { display: none; }
     button { display: none; }
   </style></head><body>${doc.innerHTML}
+
+
+
 
 
 </body></html>`);
@@ -8332,7 +8355,8 @@ function customAddRow(key, placeholder, multi) {
   const inputId = 'custom-input-' + key;
   return `<div class="onb-block" style="display:flex;gap:8px;padding-top:2px">
       <input id="${inputId}" placeholder="${placeholder}" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomChip('${key}','${inputId}',${!!multi});}" />
-      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addCustomChip('${key}','${inputId}',${!!multi})">${icon('plus')}</button>
+      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addCustomChip('${key}','${inputId}',${!!multi})">Add</button>
+      <div class="add-helper">Type your option, then tap <b>Add</b> or press Enter.</div>
     </div>`;
 }
 function addCustomChip(key, inputId, multi) {
@@ -8426,6 +8450,7 @@ function autocompleteFieldHTML(fieldKey, value, placeholder, listId) {
 }
 function filterAutocomplete(fieldKey, listId, query) {
   const list = document.getElementById('list-' + listId);
+  if (listId === 'office_location') setJobText(fieldKey, query);
   if (!list) return;
   if (!query || query.trim().length < 2) { list.style.display = 'none'; return; }
   const q = query.trim().toLowerCase();
@@ -8528,11 +8553,7 @@ function candStepBody(i) {
     ${chipMulti('cultural_values', withCustom('cultural_values', ['Ownership','Work-life balance','Fast-paced','Mentorship','Diversity','Async-first','Transparency','Flat hierarchy','Learning budget','4-day week']))}
     ${customAddRow('cultural_values', 'Add another value…', true)}
     <div class="onb-field-label">What size company do you prefer working for?</div>
-    ${chipMulti('company_size_pref', ['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'])}
-    <div class="onb-block" style="display:flex;align-items:center;justify-content:space-between;margin-top:22px">
-      <label style="margin:0">Enable match alerts</label>
-      ${switchHTML('push_alerts', true)}
-    </div>`;
+    ${chipMulti('company_size_pref', ['Startup (1-50)','Scale-up (51-500)','Enterprise (500+)'])}`;
   return '';
 }
 function recStepMeta(i) {
@@ -8981,7 +9002,9 @@ function triggerCvUpload() {
 async function handleCvFileSelected(input) {
   const file = input.files && input.files[0];
   if (!file) return;
-  if (!/\.pdf€/i.test(file.name)) { showToast('Please upload a PDF file'); input.value = ''; return; }
+  const pdfByName = /\.pdf$/i.test(file.name || '');
+  const pdfByType = String(file.type || '').toLowerCase() === 'application/pdf';
+  if (!pdfByName && !pdfByType) { showToast('Please upload a PDF file'); input.value = ''; return; }
   if (file.size > 10 * 1024 * 1024) { showToast('Your CV must be under 10MB'); input.value = ''; return; }
   uploadedCvFilename = file.name;
   aiCv = null; cvFilledLabels = []; cvAiFailed = false;
@@ -9764,8 +9787,7 @@ function candidateProfileFieldsHTML(p, objName, rerenderFn) {
     <div class="field" style="padding:0;margin-top:20px"><label>Work History</label>${workStoryHTML(objName, p.work_story, rerenderFn)}</div>
     <div class="field" style="padding:0;margin-top:20px"><label>Education & Certifications</label>${educationHTML(objName, p.education, rerenderFn)}</div>
     <div class="field" style="padding:0;margin-top:20px"><label>Highlighted Projects</label>${projectsHTML(objName, p.projects, rerenderFn)}</div>
-    <div class="field" style="padding:0;margin-top:20px"><label>CV</label><div class="cv-row">${icon('file')}<span class="cv-filename-link" onclick="openOwnCvPreview('${objName}')">${p.cv_filename}</span><a href="#" onclick="event.preventDefault(); showToast('Replace CV — re-analyzed with AI')">Replace</a></div></div>
-    <div class="field" style="padding:0;margin-top:20px;display:flex;align-items:center;justify-content:space-between"><label style="margin:0">Match alerts enabled</label><input type="checkbox" ${p.push_alerts!==false?'checked':''} onchange="${objName}.push_alerts=this.checked" style="width:20px;height:20px;accent-color:var(--brand)" /></div>`;
+    <div class="field" style="padding:0;margin-top:20px"><label>CV</label><div class="cv-row">${icon('file')}<span class="cv-filename-link" onclick="openOwnCvPreview('${objName}')">${p.cv_filename}</span><a href="#" onclick="event.preventDefault(); showToast('Replace CV — re-analyzed with AI')">Replace</a></div></div>`;
 }
 function renderProfile() {
   const el = document.getElementById('screen-profile');
@@ -10083,7 +10105,7 @@ Object.entries(DEMO_PROFILE_EXTRAS).forEach(([id,x])=>{const c=CANDIDATES.find(v
       const field=isHospitality?'Hospitality & Tourism':label;
       const c={
         id,name,headline,primary_role:headline,location:place,applied:(idx%11===0),
-        salary:`€${Math.round(salary/1000)}k min · EUR`,min_salary_amount:String(salary),min_salary_currency:'EUR',
+        salary:`${Math.round(salary/1000)}K€ min`,min_salary_amount:String(salary),min_salary_currency:'EUR',
         work_setup:setup,timezone_pref:n%8===0?['Flexible / any timezone']:[tz],available_from:`${String(availDay).padStart(2,'0')}/${String(availMonth).padStart(2,'0')}/2026`,
         notice_period:idx%4===0?'Yes':'No',notice_period_detail:idx%4===0?`${2+(idx%3)*2} weeks`:'',
         skills,tools,languages:[n%8===0?'English (C2)':levels[(idx+n)%levels.length]],field,work_field:[field],domain_id:isHospitality?'hospitality':did,
@@ -10128,5 +10150,133 @@ renderLogo();
 <script id="final-requested-overrides">(function(){
 const _rl=renderLogo;renderLogo=function(){_rl();requestAnimationFrame(()=>document.querySelectorAll('.mutch-app-symbol').forEach(x=>x.src=theme==='dark'?MUTCH_WHITE_ORANGE_CRISP:MUTCH_BLACK_ORANGE_CRISP))};
 const _tt=toggleTheme;toggleTheme=function(){_tt();requestAnimationFrame(()=>document.querySelectorAll('.mutch-app-symbol').forEach(x=>x.src=theme==='dark'?MUTCH_WHITE_ORANGE_CRISP:MUTCH_BLACK_ORANGE_CRISP))};
-})();</script></body>
+})();</script>
+
+
+<style id="mutch-ux-fixes-20260930">
+/* Consistent dropdowns */
+.flat-input, select.flat-input, .dj-trigger, .nx-select .dj-trigger{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:16px!important;color:var(--on-surface)!important;font-family:var(--font-body)!important;box-shadow:none!important}
+.dj-menu,.autocomplete-list{background:var(--surface-2)!important;border:1px solid var(--border)!important;border-radius:16px!important;box-shadow:0 14px 34px rgba(0,0,0,.12)!important;overflow:hidden}
+.dj-menu .autocomplete-item{background:var(--surface-2)!important;color:var(--on-surface)!important;min-height:48px;display:flex;align-items:center}
+.dj-menu .autocomplete-item.is-selected{color:var(--brand)!important;font-weight:700}
+.field-helper{font-size:11.5px;line-height:1.45;color:var(--muted);margin:0 0 10px}
+.add-helper{flex-basis:100%;font-size:10.5px;color:var(--muted);margin:0 2px 0;line-height:1.35}
+.smart-add-row{display:flex;gap:8px;margin-top:8px}.smart-add-row .flat-input{flex:1}.smart-add-btn{border:0;border-radius:14px;padding:0 18px;background:var(--on-surface);color:var(--surface);font-weight:700;font-family:var(--font-body)}
+/* Language levels must remain one line */
+.sub-pick .chip-row{align-items:stretch}.sub-pick .chip{white-space:nowrap;font-size:11px;padding-left:11px;padding-right:11px}
+/* Hiring process */
+.drag-hiring-row{display:grid!important;grid-template-columns:26px 26px minmax(0,1fr) 34px!important;gap:8px!important;align-items:start!important;padding:10px 0!important}
+.drag-hiring-row.dragging{opacity:.45}.drag-hiring-row.drag-over{border-top:2px solid var(--brand)}
+.hiring-drag-handle{font-size:19px;letter-spacing:-4px;color:var(--muted);cursor:grab;touch-action:none;padding-top:14px}.hiring-step-num{padding-top:14px!important}.hiring-step-fields{min-width:0;display:flex;flex-direction:column;gap:8px}.hiring-step-fields .dj-select{width:100%}.hiring-custom-input{width:100%}
+.time-wheel{display:flex;gap:8px;align-items:center}.time-wheel select{flex:1;min-width:0;height:50px;text-align:center;font-weight:700;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;color:var(--on-surface);font-family:var(--font-body);font-size:14px}
+.sla-important-note{margin:12px 0 4px;padding:11px 13px;border-radius:14px;background:rgba(255,90,31,.10);border:1px solid rgba(255,90,31,.28);font-size:11.5px;line-height:1.4;color:var(--on-surface-2)}.sla-important-note .icon{color:var(--brand)}
+/* Expandable AI fit: expands over card details rather than squeezing them */
+.nx-card,.candidate-card{position:relative}.nx-ai{cursor:pointer;position:relative;z-index:2;transition:.18s ease}.nx-ai::after{content:'Tap to expand';display:block;margin-top:6px;font-size:10px;font-weight:700;color:var(--brand)}
+.nx-ai.ai-expanded{position:absolute!important;left:16px;right:16px;top:84px;z-index:30;min-height:210px;max-height:calc(100% - 110px);overflow:auto;background:var(--surface-2)!important;box-shadow:0 16px 45px rgba(0,0,0,.18);padding:18px!important;border-radius:18px!important}.nx-ai.ai-expanded::after{content:'Tap to close'}
+/* Clean match animation — no square/filter artefacts */
+#match-overlay .match-lens-anim{filter:none!important;box-shadow:none!important;background:transparent!important;overflow:visible!important}#match-overlay .match-lens-anim *{filter:none!important}.match-figures::before,.match-figures::after{display:none!important}.match-title-mvp{margin-top:8px}
+/* Applicant controls */
+.applicant-tools{display:flex;gap:8px;padding:0 20px 10px;flex-wrap:wrap}.applicant-search{flex:1;min-width:170px}.applicant-filter-btn{height:46px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2);color:var(--on-surface);padding:0 14px;font-weight:700}.applicant-job-select{margin:0 20px 12px}.job-group-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer}.job-group-toggle{border:0;background:none;color:var(--muted);padding:6px}.job-group.collapsed .job-group-body{display:none}
+/* Recruiter onboarding skip */
+.onb-skip{width:100%;border:0;background:transparent;color:var(--muted);font-weight:700;font-family:var(--font-body);padding:13px;margin-top:4px;cursor:pointer}
+.onb-block:has(> .add-helper), div:has(> .add-helper){flex-wrap:wrap!important}.add-helper{width:100%}.office-location-help{font-size:10.5px;color:var(--muted);margin-top:7px;line-height:1.4}
+</style>
+<script id="mutch-ux-fixes-20260930-script">
+// Candidate onboarding: alerts are requested later, contextually, after first interest.
+(function(){
+ const oldCand=candStepBody;
+ candStepBody=function(i){return oldCand(i).replace(/[^<]*Enable match alerts[\s\S]*?(?=<div class="onb-field-label"|$)/gi,'');};
+})();
+
+// Recruiter onboarding steps 2 and 3 can be completed later.
+(function(){
+ const oldRender=renderOnboarding;
+ renderOnboarding=function(){
+   oldRender();
+   if(app==='recruiter' && (onboardStep===1 || onboardStep===2)){
+     const root=document.getElementById('screen-onboarding'); const next=root?.querySelector('button.btn');
+     if(next && !root.querySelector('.onb-skip')) next.insertAdjacentHTML('afterend','<button class="onb-skip" type="button" onclick="skipRecruiterOnboardStep()">Skip & complete later</button>');
+   }
+ };
+})();
+function skipRecruiterOnboardStep(){onboardStepError='';onboardStep++;renderOnboarding();}
+
+// PDF selection: accept a valid PDF immediately; parsing enriches the profile but never blocks progress.
+handleCvFileSelected=async function(input){
+ const file=input?.files?.[0]; if(!file)return;
+ const name=String(file.name||''); const type=String(file.type||'').toLowerCase();
+ if(!/\.pdf$/i.test(name) && type!=='application/pdf' && type!=='application/x-pdf'){showToast('Please choose a PDF file');input.value='';return;}
+ if(file.size>10*1024*1024){showToast('Your CV must be under 10MB');input.value='';return;}
+ uploadedCvFilename=name||'CV.pdf'; cvAiFailed=false; cvParsing=false; cvParsed=true; aiCv=null; cvFilledLabels=[];
+ buildDraftProfile(); renderOnboarding();
+ try{
+   const text=await extractCvText(file).catch(()=> '');
+   if(text){cvExtractedText=text;aiCv=parseCvLocally(text);mergeAiCvIntoOnboarding(aiCv);buildDraftProfile();renderOnboarding();}
+ }catch(e){console.warn('Optional local CV extraction skipped',e);}
+};
+
+// Custom values are explicit on mobile: Add button + Enter. Commit typed values before Next as a safety net.
+const _advanceOnboardStepUx=advanceOnboardStep;
+advanceOnboardStep=function(){
+ document.querySelectorAll('#screen-onboarding input[id^="custom-input-"]').forEach(inp=>{if(inp.value.trim()){const key=inp.id.replace('custom-input-','');addCustomChip(key,inp.id,true);}});
+ _advanceOnboardStepUx();
+};
+const _nextJobStepUx=typeof nextJobFormStep==='function'?nextJobFormStep:null;
+if(_nextJobStepUx) nextJobFormStep=function(){document.querySelectorAll('#detail-overlay input[id^="job-custom-"]').forEach(inp=>{if(inp.value.trim()){const key=inp.id.replace('job-custom-','');addJobCustomChip(key,inp.id,true);}});return _nextJobStepUx();};
+
+function addCustomFieldStudy(){const e=document.getElementById('custom-field-study');const v=(e?.value||'').trim();if(!v)return;newJobData.field_of_study_custom=newJobData.field_of_study_custom||[];if(!newJobData.field_of_study_custom.includes(v))newJobData.field_of_study_custom.push(v);newJobData.field_of_study=v;renderNewJobForm();}
+
+// Must-haves and nice-to-haves are mutually exclusive.
+const _toggleJobMultiUx=toggleJobMulti;
+toggleJobMulti=function(key,val){
+ if(key==='skills'){newJobData.nice_skills=(newJobData.nice_skills||[]).filter(x=>x!==val);}
+ if(key==='nice_skills'){newJobData.skills=(newJobData.skills||[]).filter(x=>x!==val);}
+ return _toggleJobMultiUx(key,val);
+};
+
+// Hiring process custom step, consistent dropdown, alarm-like hour/minute wheels and drag/drop.
+function pickHiringStep(selectId,i){const root=document.getElementById(selectId);const opts=root?.querySelectorAll('.autocomplete-item');const label=opts?.[i]?.textContent?.trim();const idx=Number(selectId.split('-').pop());if(!label||Number.isNaN(idx))return;const st=newJobData.hiring_process[idx];if(label==='Custom step'){if(typeof st==='object'){st.text='';st.custom=true;st.duration=st.duration||'30 min';}}else{if(typeof st==='object'){st.text=label;st.custom=false;if(['Case study','References call','Decision and offer'].includes(label))st.duration='';else st.duration=st.duration||'30 min';}}renderNewJobForm();}
+function parseDuration(v){const x=String(v||'30 min').toLowerCase();let h=0,m=0;const hm=x.match(/(\d+)\s*h/);const mm=x.match(/(\d+)\s*min/);if(hm)h=+hm[1];if(mm)m=+mm[1];if(!hm&&!mm){const n=parseInt(x)||30;if(n>=60){h=Math.floor(n/60);m=n%60}else m=n;}return{h,m};}
+function timeWheelHTML(i,v){const d=parseDuration(v);const hs=[0,1,2,3,4].map(function(h){return '<option value=\"'+h+'\" '+(d.h===h?'selected':'')+'>'+h+' h</option>';}).join('');const ms=[0,5,10,15,20,25,30,35,40,45,50,55].map(function(m){return '<option value=\"'+m+'\" '+(d.m===m?'selected':'')+'>'+String(m).padStart(2,'0')+' min</option>';}).join('');return '<div class=\"time-wheel\"><select aria-label=\"Hours\" onchange=\"setHiringWheel('+i+',this.value,null)\">'+hs+'</select><select aria-label=\"Minutes\" onchange=\"setHiringWheel('+i+',null,this.value)\">'+ms+'</select></div>'; }
+function setHiringWheel(i,h,m){const st=newJobData.hiring_process[i];if(!st)return;const d=parseDuration(st.duration);if(h!==null)d.h=+h;if(m!==null)d.m=+m;st.duration=`${d.h?d.h+' h ':''}${d.m?d.m+' min':''}`.trim()||'0 min';}
+let hiringDragFrom=null;function hiringDragStart(e,i){hiringDragFrom=i;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}function hiringDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}function hiringDrop(e,to){e.preventDefault();document.querySelectorAll('.drag-hiring-row').forEach(x=>x.classList.remove('drag-over'));if(hiringDragFrom===null||hiringDragFrom===to)return;const a=newJobData.hiring_process;const [x]=a.splice(hiringDragFrom,1);a.splice(to,0,x);hiringDragFrom=null;renderNewJobForm();}function hiringDragEnd(){hiringDragFrom=null;document.querySelectorAll('.drag-hiring-row').forEach(x=>x.classList.remove('dragging','drag-over'));}
+
+// AI fit explanation expands over the card details and closes on second tap.
+const _aiFitHTMLUx=aiFitHTML;
+aiFitHTML=function(c,j){return _aiFitHTMLUx(c,j).replace('<div class="nx-ai">','<div class="nx-ai" onclick="event.stopPropagation();this.classList.toggle(\'ai-expanded\')">');};
+
+// Settings: work for demo accounts even if the profile was not persisted in the account store.
+saveNewPassword=function(){
+ ['cur-pass-error','new-pass-error','confirm-pass-error'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='';});
+ const p=resolveProfileObj(app==='candidate'?'CANDIDATE_PROFILE':'COMPANY_PROFILE');const cur=document.getElementById('cur-pass-input')?.value||'';const next=document.getElementById('new-pass-input')?.value||'';const confirm=document.getElementById('confirm-pass-input')?.value||'';
+ if(next.length<8){document.getElementById('new-pass-error').textContent='Password must be at least 8 characters';return;}if(next!==confirm){document.getElementById('confirm-pass-error').textContent='Passwords do not match';return;}
+ const accounts=loadAccounts();let acc=accounts.find(a=>(a.email||'').toLowerCase()===(p.email||'').toLowerCase());
+ if(acc && acc.password && acc.password!==cur){document.getElementById('cur-pass-error').textContent='Current password is incorrect';return;}
+ if(!acc){acc={email:p.email||signupData.email||'demo@mutch.local',password:next,role:app,profile:p};accounts.push(acc);}else acc.password=next;saveAccounts(accounts);closeDetail();showToast('Password updated');openSettings();
+};
+const _openSettingsUx=openSettings;
+openSettings=function(){_openSettingsUx();const body=document.querySelector('#calendar-overlay .detail-body');if(!body)return;const p=resolveProfileObj(app==='candidate'?'CANDIDATE_PROFILE':'COMPANY_PROFILE');const account=body.querySelector('.detail-block-label');if(account && !body.querySelector('[data-setting-phone]'))account.insertAdjacentHTML('afterend',`<div class="settings-row" data-setting-phone onclick="openSettingsPhone()"><div><div class="settings-row-title">Phone number</div><div class="settings-row-sub">${p.phone||'Not set'}</div></div>${icon('chevronright')}</div>`);};
+function openSettingsPhone(){const p=resolveProfileObj(app==='candidate'?'CANDIDATE_PROFILE':'COMPANY_PROFILE');document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Phone number</div></div><div class="detail-body"><div class="field" style="padding:0"><label>Phone number</label>${phoneInputHTML(p.phone||'',"window.__settingsPhone",'settings-phone')}</div><button class="btn btn-full" style="margin-top:16px" onclick="saveSettingsPhone()">Save phone number</button></div>`;window.__settingsPhone=p.phone||'';document.getElementById('detail-overlay').classList.add('show');}
+function saveSettingsPhone(){const p=resolveProfileObj(app==='candidate'?'CANDIDATE_PROFILE':'COMPANY_PROFILE');p.phone=window.__settingsPhone||'';closeDetail();showToast('Phone number updated');openSettings();}
+
+// Chats: left = archive, right = mark unread. Keep vertical scrolling untouched.
+chatSwipeMove=function(e,id){const dx=e.touches[0].clientX-chatSwipeStartX,dy=e.touches[0].clientY-chatSwipeStartY;if(Math.abs(dx)<Math.abs(dy))return;if(Math.abs(dx)>8){window.__chatSwiping=true;e.preventDefault();}const row=document.getElementById('chat-row-'+id);if(row)row.style.transform=`translateX(${Math.max(-110,Math.min(110,dx))}px)`;};
+chatSwipeEnd=function(e,id){const row=document.getElementById('chat-row-'+id);if(!row)return;const dx=e.changedTouches[0].clientX-chatSwipeStartX;if(dx<-70){row.style.transition='transform .16s ease,opacity .16s ease';row.style.transform='translateX(-100%)';row.style.opacity='0';setTimeout(()=>{const i=matchesData.findIndex(m=>m.id===id);if(i>=0){archivedMatches.push(matchesData[i]);matchesData.splice(i,1);}renderMatchList();showToast('Conversation archived');},160);}else if(dx>70){const m=matchesData.find(x=>x.id===id);if(m)m.unread=true;row.style.transition='transform .16s ease';row.style.transform='translateX(0)';showToast('Marked as unread');renderMatchList();}else{row.style.transition='transform .16s ease';row.style.transform='translateX(0)';}setTimeout(()=>window.__chatSwiping=false,40);};
+
+// Applicants: clearer job selector/search and collapsible sections.
+let applicantSearchText='';let applicantJobView='all';
+const _renderApplicantsUx=renderApplicants;
+renderApplicants=function(){_renderApplicantsUx();const el=document.getElementById('screen-list');if(!el)return;const title=el.querySelector('.screen-title-row');if(!title)return;const jobs=RECRUITER_JOBS.filter(j=>!j.archived);title.insertAdjacentHTML('afterend',`<div class="applicant-tools"><input class="flat-input applicant-search" placeholder="Search candidates…" value="${applicantSearchText}" oninput="applicantSearchText=this.value;filterApplicantRows()"><button class="applicant-filter-btn" onclick="toggleApplicantFilterPanel()">${icon('filter')} Filters</button></div><div class="applicant-job-select">${nxSelectHTML('applicant-job-dd','Job offer',[{label:'All job offers',value:'all'},...jobs.map(j=>({label:j.title,value:j.id}))].map(x=>x.label),applicantJobView==='all'?'All job offers':(jobs.find(j=>j.id===applicantJobView)?.title||'All job offers'),'All job offers','pickApplicantJob')}</div>`);document.querySelectorAll('#screen-list .job-group').forEach((g,i)=>{const h=g.querySelector('.job-group-title');if(h){h.classList.add('job-group-head');h.insertAdjacentHTML('beforeend',`<button class="job-group-toggle" onclick="event.stopPropagation();this.closest('.job-group').classList.toggle('collapsed')">⌄</button>`);const nodes=[...g.children].filter(n=>n!==h);const wrap=document.createElement('div');wrap.className='job-group-body';nodes.forEach(n=>wrap.appendChild(n));g.appendChild(wrap);}});filterApplicantRows();};
+function pickApplicantJob(id,i){const jobs=RECRUITER_JOBS.filter(j=>!j.archived);applicantJobView=i===0?'all':jobs[i-1]?.id||'all';applicantsFilter=applicantJobView==='all'?null:{jobId:applicantJobView,kind:'applicants'};renderApplicants();}
+function filterApplicantRows(){const q=applicantSearchText.trim().toLowerCase();document.querySelectorAll('#screen-list .row').forEach(r=>{r.style.display=!q||r.textContent.toLowerCase().includes(q)?'':'none';});}
+function toggleApplicantFilterPanel(){showToast('Use the job dropdown plus search; compatibility/status filters are available per applicant menu.');}
+// Rename ambiguous section copy.
+const _renderApplicantsText=renderApplicants;
+renderApplicants=function(){_renderApplicantsText();const el=document.getElementById('screen-list');if(el)el.innerHTML=el.innerHTML.replace(/Haven't applied yet/g,'Discoverable talent · not applied to your jobs yet').replace(/Applied to you/g,'Candidates who applied to this job').replace(/Invited/g,'Candidates you invited to apply');};
+
+// Low compatibility requires explicit confirmation before creating the match.
+const _openMatchUx=openMatch;
+openMatch=function(item){let score=100;try{score=app==='recruiter'?computeCandidateMatchScore(item):(computeMatchScore(item)||100);}catch(e){}if(score<50 && !item.__lowMatchConfirmed){document.getElementById('applied-overlay').innerHTML=`<div class="applied-card"><div class="applied-badge" style="background:rgba(255,90,31,.12);color:var(--brand)">${icon('alert')}</div><div class="applied-title">Match anyway?</div><div class="applied-sub">This profile is a <b>${score}% match</b>. Some important requirements or preferences do not align, so review the full profile before opening a match.</div><button class="btn btn-full" onclick="toggleAppliedPopup(false);arguments[0]">Review first</button><button class="btn btn-outline btn-full" id="confirm-low-match">Yes, create the match</button></div>`;toggleAppliedPopup(true);setTimeout(()=>{const b=document.getElementById('confirm-low-match');if(b)b.onclick=()=>{toggleAppliedPopup(false);item.__lowMatchConfirmed=true;_openMatchUx(item);delete item.__lowMatchConfirmed;};},0);return;}return _openMatchUx(item);};
+</script>
+</body>
 </html>
