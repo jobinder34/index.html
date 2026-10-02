@@ -11139,3 +11139,102 @@ openPublishedJobSummary=function(jobId){
   document.getElementById('detail-overlay').classList.add('show');
 };
 </script>
+
+<style id="oct02-hiring-flow-regression-fix">
+/* Keep categorising orange markers without pushing the title text inward. */
+#detail-overlay .profile-scroll .onb-step-label{
+  position:relative!important;
+  margin:0 0 18px!important;
+  padding:8px 0!important;
+  border-left:0!important;
+  gap:0!important;
+  color:var(--on-surface-2)!important;
+}
+#detail-overlay .profile-scroll .onb-step-label::before{
+  content:''!important;
+  display:block!important;
+  position:absolute!important;
+  left:-12px!important;
+  top:7px!important;
+  bottom:7px!important;
+  width:3px!important;
+  height:auto!important;
+  border-radius:3px!important;
+  background:var(--brand)!important;
+}
+/* Give every step title breathing room before its first control/help text. */
+#detail-overlay .profile-scroll .onb-step-label + .job-step-help,
+#detail-overlay .profile-scroll .onb-step-label + .field,
+#detail-overlay .profile-scroll .onb-step-label + .onb-field-label,
+#detail-overlay .profile-scroll .onb-step-label + .chip-row,
+#detail-overlay .profile-scroll .onb-step-label + .company-logo-field{
+  margin-top:4px!important;
+}
+#detail-overlay .profile-scroll .job-step-help{margin-bottom:20px!important}
+/* Critical: the form itself, not the overlay, owns vertical scrolling. */
+#detail-overlay.show{overflow:hidden!important;min-height:0!important}
+#detail-overlay .profile-scroll{
+  flex:1 1 0!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  padding-bottom:44px!important;
+}
+/* Hiring process: handle, number, field and remove action share one visual axis. */
+#detail-overlay .drag-hiring-row{
+  grid-template-columns:22px 22px minmax(0,1fr) 30px!important;
+  column-gap:9px!important;
+  align-items:start!important;
+  padding:10px 0 22px!important;
+}
+#detail-overlay .hiring-drag-handle{
+  width:22px!important;height:48px!important;padding:0!important;
+  display:flex!important;flex-direction:column!important;
+  justify-content:center!important;align-items:center!important;gap:3px!important;
+  cursor:grab!important;touch-action:none!important;user-select:none!important;
+  font-size:0!important;position:relative!important;
+}
+#detail-overlay .hiring-drag-handle::before{display:none!important;content:none!important}
+#detail-overlay .hiring-drag-handle i{
+  display:block!important;width:16px!important;height:2px!important;
+  border-radius:999px!important;background:var(--muted)!important;
+}
+#detail-overlay .hiring-step-num{height:48px!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#detail-overlay .hiring-step-remove{margin-top:7px!important}
+#detail-overlay .drag-hiring-row.touch-dragging{opacity:.55!important}
+#detail-overlay .drag-hiring-row.touch-target{outline:2px solid var(--brand)!important;outline-offset:3px!important;border-radius:14px!important}
+</style>
+<script id="oct02-hiring-touch-drag-fix">
+/* Native HTML drag is unreliable on phones. Add handle-only pointer/touch reordering. */
+(function(){
+  let from=null,to=null,active=false;
+  function clearMarks(){document.querySelectorAll('#detail-overlay .drag-hiring-row').forEach(r=>r.classList.remove('touch-dragging','touch-target'));}
+  function start(e){
+    const handle=e.target.closest('.hiring-drag-handle'); if(!handle)return;
+    const row=handle.closest('.drag-hiring-row'); if(!row)return;
+    from=Number(row.dataset.hiringIndex); to=from; active=true; row.classList.add('touch-dragging');
+    if(e.pointerId!=null && handle.setPointerCapture){try{handle.setPointerCapture(e.pointerId)}catch(_){}}
+    e.preventDefault();
+  }
+  function move(e){
+    if(!active)return;
+    const p=e.touches?e.touches[0]:e; if(!p)return;
+    const el=document.elementFromPoint(p.clientX,p.clientY); const row=el&&el.closest&&el.closest('.drag-hiring-row');
+    if(row){to=Number(row.dataset.hiringIndex);document.querySelectorAll('#detail-overlay .drag-hiring-row').forEach(r=>r.classList.toggle('touch-target',Number(r.dataset.hiringIndex)===to));}
+    e.preventDefault();
+  }
+  function end(e){
+    if(!active)return; active=false; clearMarks();
+    if(Number.isInteger(from)&&Number.isInteger(to)&&from!==to&&newJobData&&Array.isArray(newJobData.hiring_process)){
+      const item=newJobData.hiring_process.splice(from,1)[0]; newJobData.hiring_process.splice(to,0,item); renderNewJobForm();
+    }
+    from=to=null; if(e&&e.cancelable)e.preventDefault();
+  }
+  document.addEventListener('pointerdown',start,{passive:false});
+  document.addEventListener('pointermove',move,{passive:false});
+  document.addEventListener('pointerup',end,{passive:false});
+  document.addEventListener('pointercancel',end,{passive:false});
+})();
+</script>
