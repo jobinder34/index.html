@@ -5412,7 +5412,6 @@ function openChangePassword() {
     <div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Change password</div></div>
     <div class="detail-body">
       <div class="field" style="padding:0"><label>Current password</label>${passwordFieldHTML('cur-pass-input','Current password')}<div class="field-error" id="cur-pass-error"></div></div>
-      <button class="text-btn" style="margin:10px 0 2px;padding:0;color:var(--highlight);font-weight:700" onclick="recoverPasswordFromSettings()">Forgot your current password?</button>
       <div class="field" style="padding:0;margin-top:14px"><label>New password</label>${passwordFieldHTML('new-pass-input','At least 8 characters')}<div class="field-error" id="new-pass-error"></div></div>
       <div class="field" style="padding:0;margin-top:14px"><label>Confirm new password</label>${passwordFieldHTML('confirm-pass-input','Repeat new password')}<div class="field-error" id="confirm-pass-error"></div></div>
       <button class="btn btn-full" style="margin-top:16px" onclick="saveNewPassword()">${icon('check')} Save password</button>
@@ -5514,6 +5513,7 @@ function toggleMenu(show) {
       <div class="menu-item" onclick="menuNav(()=>openFavorites())">${icon('star')} Favorites</div>
       <div class="menu-item" onclick="menuNav(()=>openBilling())">${icon('cardpay')} Billing</div>
       <div class="menu-item" onclick="menuNav(()=>openCalendar())">${icon('calendar')} Calendar</div>
+      <div class="menu-item" onclick="menuNav(()=>openCalendar())">${icon('calendar')} Interviews</div>
       <div class="menu-item" onclick="menuNav(()=>openIntegrations())">${icon('link')} Integrations</div>`;
     document.getElementById('menu-sheet').innerHTML = `
       ${app==='candidate' ? candidateItems : recruiterItems}
@@ -6666,6 +6666,7 @@ function openJobDetail(id) {
       <div><div class="detail-block-label">Hiring process</div>
         <div class="process-list">${job.hiring_process.map((s,i)=>`<div class="process-step"><div class="process-num">${i+1}</div><div class="process-text">${s}</div></div>`).join('')}</div>
       </div>
+      <button class="report-job-link" onclick="openReportJob('${job.id}')">${icon('alert')} Report this job</button>
       ${applied ? `<div class="match-note application-sla-note"><span class="application-sla-icon">${icon('clock')}</span><span class="application-sla-copy">You applied ${applied.applied_date}. ${slaPillHTML(applied)}</span></div>` : ''}
       <button class="btn btn-full ${applied ? 'application-status-btn' : ''}" onclick="${applied ? `closeDetail(); openDiary();` : `closeDetail(); swipeFromDetail('${job.id}');`}">${applied ? icon('cardlist')+'<span>Already applied — view status in Diary</span>' : icon('heart')+' Apply now'}</button>
     </div>`;
@@ -6693,7 +6694,7 @@ function openCandidateDetail(id, matchId) {
       </div>
       <div class="stat-row">
         <div class="stat-box quick-fact-blue"><span>AVAILABLE FROM</span><b>${c.available_from}</b></div>
-        <div class="stat-box quick-fact-orange"><span>EXPECTED SALARY</span><b>${c.salary.split('·')[0]}</b></div>
+        <div class="stat-box quick-fact-orange"><span>EXPECTED SALARY · GROSS</span><b>${c.salary.split('·')[0]}</b></div>
       </div>
       <div class="tag-row">${c.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
       <div><div class="detail-block-label">Summary</div><div class="detail-text">${c.summary}</div></div>
@@ -7142,7 +7143,7 @@ function renderJobsTab() {
       <button class="title-action" onclick="openNewJobForm()">${icon('plus')} New</button>
     </div>
     ${jobs.length ? `<div class="match-note" style="margin:0 20px 10px">${icon('sparkle')} Swipe a job left to pause it, right to archive it.</div><div class="list-scroll">${jobs.map(j => `
-      <div class="job-post-row swipe-row" id="job-row-${j.id}" ontouchstart="jobRowSwipeStart(event)" ontouchmove="jobRowSwipeMove(event,'${j.id}')" ontouchend="jobRowSwipeEnd(event,'${j.id}')" onclick="if(!window.__jobRowSwiping){ openJobEdit('${j.id}') }" style="cursor:pointer">
+      <div class="job-post-row swipe-row" id="job-row-${j.id}" ontouchstart="jobRowSwipeStart(event)" ontouchmove="jobRowSwipeMove(event,'${j.id}')" ontouchend="jobRowSwipeEnd(event,'${j.id}')" onclick="if(!window.__jobRowSwiping){ openPublishedJobSummary('${j.id}') }" style="cursor:pointer">
         <div class="job-post-top">
           <div class="job-post-title">${j.title}</div>
           ${jobStatusPillHTML(j)}
@@ -7294,8 +7295,8 @@ function jobCustomAddRow(key, placeholder, multi) {
   const inputId = 'job-custom-' + key;
   return `<div style="display:flex;gap:8px;margin-top:8px">
       <input id="${inputId}" class="flat-input" placeholder="${placeholder}" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addJobCustomChip('${key}','${inputId}',${!!multi});}" />
-      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addJobCustomChip('${key}','${inputId}',${!!multi})">Add</button>
-      <div class="add-helper">Type your option, then tap <b>Add</b> or press Enter.</div>
+      <button class="attach-btn global-add-btn" onclick="addJobCustomChip('${key}','${inputId}',${!!multi})">Add</button>
+      <div class="add-helper">Type your option, then tap <b>Add</b>.</div>
     </div>`;
 }
 function addJobCustomChip(key, inputId, multi) {
@@ -7410,13 +7411,13 @@ function jobFormStepBody(d, step) {
 
   if (step === 2) return `
       <div class="onb-step-label" style="padding:8px 0 8px">3. Compensation & benefits</div>
-      <div class="onb-field-label" style="margin-left:0">Annual salary range</div>
+      <div class="onb-field-label" style="margin-left:0">Annual gross salary</div>
+      <div class="field" style="padding:0;margin-bottom:10px">${nxSelectHTML('salary-type-select','Salary format',['Salary range','Exact salary'],d.salary_type||'Salary range','Choose salary format','pickSalaryType')}</div>
       <div style="display:flex;gap:8px">
         <select class="flat-input" style="width:78px;flex-shrink:0;padding-left:10px;padding-right:10px" onchange="setJobText('currency', this.value)">
           ${['EUR','USD','GBP','CHF','CAD','AUD'].map(c=>`<option ${(d.currency||'EUR')===c?'selected':''}>${c}</option>`).join('')}
         </select>
-        <input class="flat-input" placeholder="Min" style="flex:1" value="${d.salary_min||''}" oninput="setJobText('salary_min', this.value)" />
-        <input class="flat-input" placeholder="Max" style="flex:1" value="${d.salary_max||''}" oninput="setJobText('salary_max', this.value)" />
+        ${(d.salary_type||'Salary range')==='Exact salary' ? `<div class="salary-number-field" style="flex:1"><input class="flat-input" inputmode="numeric" placeholder="55000" value="${d.salary_exact||''}" oninput="setJobText('salary_exact', this.value);setJobText('salary_min',this.value);setJobText('salary_max',this.value)" /><small>Exact · gross</small></div>` : `<div class="salary-number-field"><input class="flat-input" inputmode="numeric" placeholder="38000" value="${d.salary_min||''}" oninput="setJobText('salary_min', this.value)" /><small>Min · gross</small></div><div class="salary-number-field"><input class="flat-input" inputmode="numeric" placeholder="70000" value="${d.salary_max||''}" oninput="setJobText('salary_max', this.value)" /><small>Max · gross</small></div>`}
       </div>
       <div class="onb-field-label" style="margin-left:0">Benefits</div>
       ${jobChipMulti('benefits', jobWithCustom('benefits', ['Health insurance','Equity','Remote budget','Learning budget','Unlimited PTO','Meal vouchers','Gym membership','Mental health support','Team building events']))}
@@ -7433,7 +7434,7 @@ function jobFormStepBody(d, step) {
       ${d.field_of_study_required === 'Yes' ? `<div class="field" style="padding:0;margin-top:12px">
         ${nxSelectHTML('fos-select', 'Field of study', [...new Set([...FIELD_OF_STUDY_OPTIONS.filter(x=>x!=='Any / not specific'), ...(d.field_of_study_custom||[])])], d.field_of_study, 'Select the required field of study…', 'pickFieldOfStudy')}
         <div class="field-helper" style="margin-top:10px">Don’t see the field you need? Add it below.</div>
-        <div class="smart-add-row"><input id="custom-field-study" class="flat-input" placeholder="Add another field of study…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomFieldStudy()}"><button type="button" class="smart-add-btn" onclick="addCustomFieldStudy()">Add</button></div>
+        <div class="smart-add-row"><input id="custom-field-study" class="flat-input" placeholder="Add another field of study…" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomFieldStudy()}"><button type="button" class="smart-add-btn global-add-btn" onclick="addCustomFieldStudy()">Add</button></div>
       </div>` : ''}`;
 
   if (step === 4) return `
@@ -7517,7 +7518,7 @@ function jobFormStepBody(d, step) {
         <span class="chip ${!d._customSla?'on':''}" onclick="setJobText('_customSla', false); setJobText('sla_days', String(COMPANY_PROFILE.sla_days)+' days'); renderNewJobForm()">Use my company default (${COMPANY_PROFILE.sla_days} days)</span>
         <span class="chip ${d._customSla?'on':''}" onclick="setJobText('_customSla', true); renderNewJobForm()">Set a specific commitment for this role</span>
       </div>
-      <div class="sla-important-note">${icon('alert')} <b>Tip:</b> a shorter response commitment gives candidates clarity faster and strengthens your response experience.</div>
+      ${d._customSla && ['21 days','30 days'].includes(d.sla_days) ? `<div class="sla-important-note sla-long-warning">${icon('alert')} <b>Long response time:</b> candidates value an early first response. A shorter commitment can improve their experience and your response performance.</div>` : ''}
       ${d._customSla ? `
       <div class="onb-field-label" style="margin-left:0;margin-top:14px">Response time for this role</div>
       ${jobChipSelect('sla_days', ['3 days','5 days','7 days','10 days','14 days','21 days','30 days'])}
@@ -7793,6 +7794,8 @@ function downloadCandidateCvPdf(name) {
     .match-note { display: none; }
     button { display: none; }
   </style></head><body>${doc.innerHTML}
+
+
 
 
 
@@ -8415,8 +8418,8 @@ function customAddRow(key, placeholder, multi) {
   const inputId = 'custom-input-' + key;
   return `<div class="onb-block" style="display:flex;gap:8px;padding-top:2px">
       <input id="${inputId}" placeholder="${placeholder}" style="flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomChip('${key}','${inputId}',${!!multi});}" />
-      <button class="attach-btn" style="width:auto;padding:0 14px;background:var(--surface-2);border:1px solid var(--border);color:var(--on-surface)" onclick="addCustomChip('${key}','${inputId}',${!!multi})">Add</button>
-      <div class="add-helper">Type your option, then tap <b>Add</b> or press Enter.</div>
+      <button class="attach-btn global-add-btn" onclick="addCustomChip('${key}','${inputId}',${!!multi})">Add</button>
+      <div class="add-helper">Type your option, then tap <b>Add</b>.</div>
     </div>`;
 }
 function addCustomChip(key, inputId, multi) {
@@ -9324,7 +9327,7 @@ function openCalendar() {
     <div class="detail-header"><button class="chat-back" onclick="backToMenu()">${icon('back')}</button><div class="detail-title">${icon('calendar')} Calendar</div></div>
     <div class="list-scroll">
       <div class="section-label">Upcoming interviews</div>
-      ${events.length ? events.map(e => `<div class="cal-item"><div class="cal-date"><b>${e.day}</b><span>${e.mon}</span></div><div><div class="cal-title">${e.title}</div><div class="cal-sub">${e.sub}</div></div></div>`).join('')
+      ${events.length ? events.map((e,i) => `<div class="cal-item" onclick="openInterviewSummary(${i})"><div class="cal-date"><b>${e.day}</b><span>${e.mon}</span></div><div><div class="cal-title">${e.title}</div><div class="cal-sub">${e.sub}</div></div></div>`).join('')
         : `<div class="empty-state"><div class="empty-icon">${icon('calendar')}</div><div style="font-weight:700;font-family:var(--font-display)">Nothing scheduled yet</div></div>`}
     </div>`;
   document.getElementById('calendar-overlay').classList.add('show');
@@ -9825,7 +9828,7 @@ function candidateProfileFieldsHTML(p, objName, rerenderFn) {
     <div class="field" style="padding:0;margin-top:20px"><label>Headline</label><input value="${p.headline}" oninput="${objName}.headline=this.value" /></div>
     <div class="field" style="padding:0;margin-top:20px"><label>Short bio</label><textarea rows="3" oninput="${objName}.bio=this.value">${p.bio}</textarea></div>
     <div class="field" style="padding:0;margin-top:20px"><label>Location</label><input value="${p.location||''}" placeholder="City, country" oninput="${objName}.location=this.value" /></div>
-    <div class="field" style="padding:0;margin-top:20px"><label>Minimum salary <span style="color:var(--muted);font-weight:400">— Annually, Gross</span></label>
+    <div class="field" style="padding:0;margin-top:20px"><label>Minimum gross salary <span style="color:var(--muted);font-weight:400">— annually</span></label>
       <div style="display:flex;gap:8px">
         <select class="flat-input" style="width:78px;flex-shrink:0" onchange="${objName}.min_salary_currency=this.value; syncMinSalary('${objName}'); ${rerenderFn}()">
           ${['EUR','USD','GBP','CHF','CAD','AUD'].map(c=>`<option ${(p.min_salary_currency||'EUR')===c?'selected':''}>${c}</option>`).join('')}
@@ -10258,7 +10261,7 @@ const _tt=toggleTheme;toggleTheme=function(){_tt();requestAnimationFrame(()=>doc
    oldRender();
    if(app==='recruiter' && (onboardStep===1 || onboardStep===2)){
      const root=document.getElementById('screen-onboarding'); const next=root?.querySelector('button.btn');
-     if(next && !root.querySelector('.onb-skip')) next.insertAdjacentHTML('afterend','<button class="onb-skip" type="button" onclick="skipRecruiterOnboardStep()">Skip & complete later</button>');
+     if(next && !root.querySelector('.onb-skip')) next.insertAdjacentHTML('afterend','<button class="onb-skip" type="button" onclick="skipRecruiterOnboardStep()">Skip & complete later <span class="skip-chevrons" aria-hidden="true">&gt;&gt;</span></button>');
    }
  };
 })();
@@ -10499,6 +10502,275 @@ finishOnboarding=function(){
   if(app==='recruiter'){COMPANY_PROFILE.email=signupData.email||COMPANY_PROFILE.email||'';COMPANY_PROFILE.phone=signupData.phone||COMPANY_PROFILE.phone||'';COMPANY_PROFILE.recruiter_role=signupData.recruiter_role||COMPANY_PROFILE.recruiter_role||'';COMPANY_PROFILE.website=onboardData.website||COMPANY_PROFILE.website||'';}
   const r=__finishOnboardingAudit2();persistCurrentProfile();return r;
 };
+</script>
+
+<style id="global-add-skip-polish-20261002">
+/* Every free-text Add action across candidate + recruiter flows uses the same prominent brand treatment. */
+.global-add-btn,
+.smart-add-btn,
+button.attach-btn[onclick^="addCustomChip"],
+button.attach-btn[onclick^="addJobCustomChip"]{
+  width:auto!important;min-width:64px!important;height:54px!important;min-height:54px!important;
+  padding:0 18px!important;border-radius:16px!important;border:1px solid var(--brand)!important;
+  background:var(--brand)!important;color:#fff!important;font-family:var(--font-body)!important;
+  font-size:14px!important;font-weight:800!important;line-height:1!important;align-self:stretch!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  box-shadow:0 5px 14px rgba(255,82,37,.16)!important;cursor:pointer!important;
+}
+.global-add-btn:active,.smart-add-btn:active{transform:scale(.97)}
+/* Recruiter optional-step action: same position, but clearly discoverable. */
+.onb-skip{color:var(--brand)!important;font-weight:800!important;letter-spacing:-.01em!important;}
+.onb-skip .skip-chevrons{display:inline-block;margin-left:7px;font-size:16px;font-weight:900;letter-spacing:-4px;transform:translateY(1px);}
+
+/* Mutch form hierarchy: free-text hints stay visually secondary to selectable chips */
+.field input::placeholder, .field textarea::placeholder,
+.onb-block input::placeholder, .onb-block textarea::placeholder,
+.flat-input::placeholder, input.flat-input::placeholder, textarea.flat-input::placeholder {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.35 !important;
+  color: var(--muted) !important;
+  opacity: .82 !important;
+}
+</style>
+
+<style id="mutch-oct02-card-tutorial-fixes">
+/* Guided tour must always remain above Analytics/Diary overlays. */
+#tour-overlay{z-index:1000!important}
+#tour-overlay.show{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+
+/* Stronger but still restrained section hierarchy across Settings, Diary and detail pages. */
+.detail-block-label{
+  color:var(--on-surface-2)!important;
+  font-size:11.5px!important;
+  font-weight:800!important;
+  letter-spacing:.045em!important;
+  text-transform:uppercase;
+  display:flex!important;
+  align-items:center;
+  gap:7px;
+  padding-left:9px;
+  border-left:3px solid var(--brand);
+  margin-top:22px!important;
+  margin-bottom:10px!important;
+}
+.detail-body>.detail-block-label:first-child{margin-top:8px!important}
+
+/* Recruiter candidate card: compact identity banner, leaving room for matching detail. */
+.card.card-photo .nx-banner{min-height:118px!important;height:118px!important;flex:0 0 118px!important;padding:12px 14px!important}
+.card.card-photo .nx-banner .nx-avatar{width:58px!important;height:58px!important;margin-top:0!important}
+.card.card-photo .nx-banner .nx-photo-copy{
+  position:absolute!important;left:88px!important;right:14px!important;bottom:13px!important;
+  padding:0!important;gap:2px!important;text-align:left!important;
+}
+.card.card-photo .nx-banner .nx-photo-copy b{font-size:20px!important;line-height:1.05!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block!important}
+.card.card-photo .nx-banner .nx-photo-copy small{font-size:12px!important}
+.card.card-photo .nx-banner .nx-match{padding:6px 10px!important}
+.card.card-photo .nx-body{padding-bottom:14px!important}
+.card.card-photo .nx-duo{margin-top:9px!important}
+.card.card-photo .nx-inline{padding-top:8px!important}
+.card.card-photo .nx-tagline{padding-top:7px!important;max-height:32px!important}
+/* Never remove the key AI-fit explanation on shorter Android viewports. */
+@media (max-height:740px){
+  .card.card-photo .nx-ai{display:flex!important;margin-top:7px!important;padding:8px 11px!important}
+  .card.card-photo .nx-ai p{-webkit-line-clamp:1!important;font-size:11.5px!important;line-height:1.3!important}
+  .card.card-photo .nx-ai-label{font-size:9.5px!important}
+  .card.card-photo .nx-about{display:none!important}
+  .card.card-photo .nx-actions{padding-top:7px!important}
+}
+/* Expanded AI explanation keeps the same orange treatment and stays inside the white card, above actions. */
+.card.card-photo .nx-ai.ai-expanded{
+  display:flex!important;position:absolute!important;left:14px!important;right:14px!important;
+  top:136px!important;bottom:76px!important;z-index:35!important;min-height:0!important;max-height:none!important;
+  overflow:auto!important;background:var(--brand-soft)!important;border:1px solid rgba(255,90,31,.22)!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.10)!important;padding:16px!important;border-radius:18px!important;
+}
+.card.card-photo .nx-ai.ai-expanded p{display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important;font-size:13px!important;line-height:1.5!important}
+.card.card-photo .nx-ai.ai-expanded .nx-ai-label{font-size:11px!important}
+.sla-long-warning{background:rgba(255,90,31,.14)!important;border-color:rgba(255,90,31,.42)!important;color:var(--on-surface)!important}
+</style>
+<script id="mutch-oct02-tour-guard">
+/* Some mobile browsers create extra stacking contexts when Analytics animates in.
+   Re-assert the tour after opening its contextual screen so the tutorial never disappears. */
+(function(){
+  const oldRenderTour=renderTour;
+  renderTour=function(){
+    oldRenderTour();
+    requestAnimationFrame(function(){
+      const t=document.getElementById('tour-overlay');
+      if(t){t.classList.add('show');t.style.zIndex='1000';}
+    });
+  };
+})();
+</script>
+\n<style id="mutch-fixes-20261002-b">
+.settings-recovery-link{display:block;border:0!important;background:transparent!important;box-shadow:none!important;padding:4px 2px!important;margin:7px 0 14px!important;color:var(--highlight)!important;font:600 12.5px/1.25 var(--font-body)!important;text-align:left!important;text-decoration:none!important;width:auto!important}
+.settings-recovery-link:active{opacity:.65}
+.salary-number-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}.salary-number-field small{font-size:11px;font-weight:700;color:var(--muted);padding-left:3px}
+/* Applicants */
+.applicant-tools-v2{display:grid;grid-template-columns:1fr auto;gap:9px;margin:0 20px 10px}.applicant-search-wrap{display:flex;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}.applicant-search-wrap input{border:0!important;background:transparent!important;min-width:0;flex:1;padding:13px 14px!important}.applicant-search-go{width:46px;border:0;background:var(--on-surface);color:var(--surface);display:grid;place-items:center}.applicant-search-go .icon{width:18px;height:18px}.applicant-filter-btn-v2{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:0 14px;font-weight:700;color:var(--on-surface)}
+.applicant-filter-panel-v2{margin:0 20px 10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:none}.applicant-filter-panel-v2.show{display:block}.applicant-filter-panel-v2 .chip-row{margin:0}.applicant-job-v2{margin:0 20px 14px}.applicant-select-action{margin:0 20px 10px;display:flex;justify-content:flex-end}.applicant-select-action button{border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:650;padding:5px 3px}.applicant-bulk-bar{margin:0 20px 10px!important;border-radius:14px!important;padding:9px 11px!important}.applicant-bulk-bar .struct-checkbox span{font-size:12px!important;color:var(--muted)!important}.job-group-title,.section-label.rank-label,.section-label{color:var(--highlight)!important;font-weight:800!important}.job-group-head{min-height:38px!important;display:flex!important;align-items:center!important}.job-group-toggle{width:34px!important;height:34px!important;min-width:34px!important;border-radius:50%!important;display:grid!important;place-items:center!important;font-size:20px!important;line-height:1!important;padding:0!important}.match-row-modern .row-msg{display:none!important}.match-row-modern .row-text{padding-right:5px!important}.match-row-modern .row-name{font-weight:750!important}.match-row-modern .match-row-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.match-row-modern .compat-score{color:var(--highlight)!important;font-weight:800!important}.applicant-checkbox{display:none!important}.applicant-select-mode .applicant-checkbox{display:block!important}.applicant-select-mode .match-row-status-pill{display:none!important}
+/* Hiring process: reliable custom dropdown + wheel */
+.hire-select{position:relative;width:100%}.hire-select>button{width:100%;height:48px;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--on-surface)}.hire-select-menu{display:none;position:absolute;z-index:30;left:0;right:0;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.12);overflow:hidden}.hire-select.open .hire-select-menu{display:block}.hire-select-menu button{display:block;width:100%;border:0;border-bottom:1px solid var(--border);background:var(--surface);padding:12px 14px;text-align:left;color:var(--on-surface);font-size:13px}.hire-select-menu button:last-child{border-bottom:0}.hire-select-menu button.active{color:var(--highlight);font-weight:750}.hiring-custom-input{margin-top:2px}.time-wheel{height:112px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:0!important;overflow:hidden!important}.time-wheel-col{height:112px;overflow-y:auto;scroll-snap-type:y mandatory;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:34px 0}.time-wheel-col::-webkit-scrollbar{display:none}.time-wheel-opt{height:42px;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);border:0;background:transparent;width:100%}.time-wheel-opt.active{font-size:17px;font-weight:800;color:var(--on-surface)}
+/* Job summary */
+.job-summary-hero{margin:0 0 16px;padding:18px;border-radius:20px;background:var(--surface);border:1px solid var(--border)}.job-summary-title{font-family:var(--font-display);font-size:24px;font-weight:850;letter-spacing:-.03em}.job-summary-meta{margin-top:6px;color:var(--muted);font-size:13px}.job-summary-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.job-summary-section{padding:15px 0;border-bottom:1px solid var(--border)}.job-summary-section:last-child{border-bottom:0}.job-summary-section h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--highlight);margin:0 0 8px;font-weight:850}.job-summary-section p{margin:0;font-size:14px;line-height:1.5}.job-summary-chips{display:flex;flex-wrap:wrap;gap:6px}.job-summary-chips span{background:var(--surface-2);padding:7px 10px;border-radius:999px;font-size:12px}
+</style>
+<script id="mutch-fixes-20261002-b">
+// Hiring process dropdown: previous callback received only an option index, so changing a step could not know which row to edit.
+function toggleHireSelect(e,i){e.stopPropagation();document.querySelectorAll('.hire-select.open').forEach(x=>{if(x.id!=='hire-select-'+i)x.classList.remove('open')});document.getElementById('hire-select-'+i)?.classList.toggle('open')}
+function chooseHiringStep(row,label){const st=newJobData.hiring_process[row];if(!st)return;if(label==='Custom step'){st.text='';st.custom=true;st.duration=st.duration||'30 min'}else{st.text=label;st.custom=false;st.duration=['Case study','References call','Decision and offer'].includes(label)?'':(st.duration||'30 min')}renderNewJobForm()}
+function hiringStepRowHTML(s,i){const step=typeof s==='object'?s:{text:s,duration:'30 min'};const presets=['Screening call','Interview with manager','Case study','Presentation','Interview with the CEO','References call','Decision and offer'];const isCustom=!!step.custom||(!presets.includes(step.text));const noTime=['Case study','References call','Decision and offer'].includes(step.text);const shown=isCustom?'Custom step':(step.text||'Choose a step…');return `<div class="hiring-step-row drag-hiring-row" draggable="true" data-hiring-index="${i}" ondragstart="hiringDragStart(event,${i})" ondragover="hiringDragOver(event)" ondrop="hiringDrop(event,${i})" ondragend="hiringDragEnd(event)"><div class="hiring-drag-handle">⋮⋮</div><div class="hiring-step-num">${i+1}</div><div class="hiring-step-fields"><div class="hire-select" id="hire-select-${i}"><button type="button" onclick="toggleHireSelect(event,${i})"><span>${shown}</span><span>⌄</span></button><div class="hire-select-menu">${[...presets,'Custom step'].map(x=>`<button type="button" class="${shown===x?'active':''}" onclick="event.stopPropagation();chooseHiringStep(${i},'${x.replace(/'/g,"\\'")}')">${x}</button>`).join('')}</div></div>${isCustom?`<input class="flat-input hiring-custom-input" placeholder="Write your custom step…" value="${String(step.text||'').replace(/"/g,'&quot;')}" oninput="editHiringStep(${i},this.value)">`:''}${noTime?'':timeWheelHTML(i,step.duration||'30 min')}</div><button class="hiring-step-remove" onclick="removeHiringStep(${i})">${icon('x')}</button></div>`}
+function timeWheelHTML(i,v){const d=parseDuration(v);const hs=[0,1,2,3,4],ms=[0,5,10,15,20,25,30,35,40,45,50,55];return `<div class="time-wheel"><div class="time-wheel-col" data-wheel="h">${hs.map(h=>`<button type="button" class="time-wheel-opt ${d.h===h?'active':''}" onclick="setHiringWheel(${i},${h},null);renderNewJobForm()">${h} h</button>`).join('')}</div><div class="time-wheel-col" data-wheel="m">${ms.map(m=>`<button type="button" class="time-wheel-opt ${d.m===m?'active':''}" onclick="setHiringWheel(${i},null,${m});renderNewJobForm()">${String(m).padStart(2,'0')} min</button>`).join('')}</div></div>`}
+
+// Applicants controls
+let applicantFilterOpen=false, applicantMatchBand='all';
+function pickApplicantJob(i){const jobs=RECRUITER_JOBS.filter(j=>!j.archived);applicantJobView=i===0?'all':(jobs[i-1]?.id||'all');applicantsFilter=applicantJobView==='all'?null:{jobId:applicantJobView,kind:'applicants'};renderApplicants()}
+function runApplicantSearch(){filterApplicantRows();document.querySelector('.applicant-search')?.blur()}
+function toggleApplicantFiltersV2(){applicantFilterOpen=!applicantFilterOpen;document.querySelector('.applicant-filter-panel-v2')?.classList.toggle('show',applicantFilterOpen)}
+function setApplicantMatchBand(v){applicantMatchBand=v;document.querySelectorAll('#screen-list .match-row-modern').forEach(r=>{const n=parseInt(r.querySelector('.compat-score')?.textContent)||0;const ok=v==='all'||(v==='high'&&n>=80)||(v==='mid'&&n>=60&&n<80)||(v==='low'&&n<60);r.style.display=ok?'':'none'});document.querySelectorAll('.applicant-filter-panel-v2 .chip').forEach(c=>c.classList.toggle('on',c.dataset.band===v))}
+const __renderApplicantsFinal=renderApplicants;renderApplicants=function(){__renderApplicantsFinal();const el=document.getElementById('screen-list');if(!el)return;const oldTools=el.querySelector('.applicant-tools');if(oldTools)oldTools.remove();const oldJob=el.querySelector('.applicant-job-select');if(oldJob)oldJob.remove();const title=el.querySelector('.screen-title-row');if(!title)return;const jobs=RECRUITER_JOBS.filter(j=>!j.archived);title.insertAdjacentHTML('afterend',`<div class="applicant-tools-v2"><div class="applicant-search-wrap"><input class="applicant-search" placeholder="Search candidates…" value="${window.applicantSearchText||''}" oninput="window.applicantSearchText=this.value" onkeydown="if(event.key==='Enter')runApplicantSearch()"><button class="applicant-search-go" onclick="runApplicantSearch()">${icon('search')}</button></div><button class="applicant-filter-btn-v2" onclick="toggleApplicantFiltersV2()">Filters</button></div><div class="applicant-filter-panel-v2 ${applicantFilterOpen?'show':''}"><div class="chip-row">${[['all','All matches'],['high','80%+'],['mid','60–79%'],['low','Below 60%']].map(x=>`<span class="chip ${applicantMatchBand===x[0]?'on':''}" data-band="${x[0]}" onclick="setApplicantMatchBand('${x[0]}')">${x[1]}</span>`).join('')}</div></div><div class="applicant-job-v2">${nxSelectHTML('applicant-job-dd','Job offer',['All job offers',...jobs.map(j=>j.title)],applicantJobView==='all'?'All job offers':(jobs.find(j=>j.id===applicantJobView)?.title||'All job offers'),'All job offers','pickApplicantJob')}</div><div class="applicant-select-action"><button onclick="applicantSelectMode=!applicantSelectMode;selectedApplicantIds.clear();renderApplicants()">${applicantSelectMode?'Done selecting':'Select candidates'}</button></div>`);el.classList.toggle('applicant-select-mode',applicantSelectMode);const bulk=el.querySelector('.applicant-bulk-bar');if(bulk && !applicantSelectMode)bulk.remove();document.querySelectorAll('#screen-list .job-group').forEach(g=>{const h=g.querySelector('.job-group-title');if(h&&!h.querySelector('.job-group-toggle'))h.insertAdjacentHTML('beforeend','<button class="job-group-toggle" onclick="event.stopPropagation();this.closest(\'.job-group\').classList.toggle(\'collapsed\')">⌄</button>')});filterApplicantRows();setApplicantMatchBand(applicantMatchBand)};
+
+// Published job opens a read-only summary first; editing remains a deliberate secondary action.
+function openPublishedJobSummary(jobId){const j=RECRUITER_JOBS.find(x=>x.id===jobId);if(!j)return;const chips=a=>(a||[]).map(x=>`<span>${x}</span>`).join('');const salary=(j.salary_min||j.salary_max)?`${j.salary_min||'—'}–${j.salary_max||'—'} ${j.currency||'EUR'} gross / year`:'Not specified';document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Job summary</div></div><div class="detail-body"><div class="job-summary-hero"><div class="job-summary-title">${j.title}</div><div class="job-summary-meta">${j.department||'Team not specified'} · ${Array.isArray(j.work_setup)?j.work_setup.join(' · '):(j.work_setup||'')}</div><div class="job-summary-actions"><button class="btn btn-outline" onclick="openJobEdit('${j.id}')">${icon('edit')} Edit</button><button class="btn" onclick="openJobAnalytics('${j.id}')">${icon('barchart')} View analytics</button></div></div><div class="job-summary-section"><h3>Compensation</h3><p>${salary}</p></div><div class="job-summary-section"><h3>Role</h3><p>${j.summary||'No summary added.'}</p></div><div class="job-summary-section"><h3>Must-have skills</h3><div class="job-summary-chips">${chips(j.skills)||'<span>None specified</span>'}</div></div><div class="job-summary-section"><h3>Nice to have</h3><div class="job-summary-chips">${chips(j.nice_skills)||'<span>None specified</span>'}</div></div><div class="job-summary-section"><h3>Hiring process</h3><p>${(j.hiring_process||[]).map((x,i)=>`${i+1}. ${typeof x==='object'?x.text:x}${typeof x==='object'&&x.duration?' · '+x.duration:''}`).join('<br>')||'Not specified'}</p></div><div class="job-summary-section"><h3>Response commitment</h3><p>${j.sla_days||j.response_days||'Not specified'}${String(j.sla_days||'').includes('day')?'':' days'}</p></div></div>`;document.getElementById('detail-overlay').classList.add('show')}
+function openJobAnalytics(jobId){const j=RECRUITER_JOBS.find(x=>x.id===jobId);if(!j)return;document.getElementById('calendar-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="closeCalendar();openPublishedJobSummary('${j.id}')">${icon('back')}</button><div class="detail-title">${icon('barchart')} ${j.title} analytics</div></div><div class="detail-body"><div class="stat-row"><div class="stat-box"><span>VIEWS</span><b>${j.views||j.applicants*6}</b></div><div class="stat-box"><span>APPLICANTS</span><b>${j.applicants}</b></div><div class="stat-box"><span>MATCHES</span><b>${j.matches}</b></div></div>${pctRingHTML(j.applicants?j.matches/j.applicants*100:0,`<b>Applicant → match rate</b><br>${j.applicants?Math.round(j.matches/j.applicants*100):0}% of applicants matched.`,'var(--orange)')}</div>`;document.getElementById('calendar-overlay').classList.add('show')}
+</script>\n
+
+<style id="mutch-fixes-20261002-b">
+.settings-recovery-link{display:block;border:0!important;background:transparent!important;box-shadow:none!important;padding:4px 2px!important;margin:7px 0 14px!important;color:var(--highlight)!important;font:600 12.5px/1.25 var(--font-body)!important;text-align:left!important;text-decoration:none!important;width:auto!important}
+.settings-recovery-link:active{opacity:.65}
+.salary-number-field{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}.salary-number-field small{font-size:11px;font-weight:700;color:var(--muted);padding-left:3px}
+/* Applicants */
+.applicant-tools-v2{display:grid;grid-template-columns:1fr auto;gap:9px;margin:0 20px 10px}.applicant-search-wrap{display:flex;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}.applicant-search-wrap input{border:0!important;background:transparent!important;min-width:0;flex:1;padding:13px 14px!important}.applicant-search-go{width:46px;border:0;background:var(--on-surface);color:var(--surface);display:grid;place-items:center}.applicant-search-go .icon{width:18px;height:18px}.applicant-filter-btn-v2{border:1px solid var(--border);background:var(--surface);border-radius:16px;padding:0 14px;font-weight:700;color:var(--on-surface)}
+.applicant-filter-panel-v2{margin:0 20px 10px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:none}.applicant-filter-panel-v2.show{display:block}.applicant-filter-panel-v2 .chip-row{margin:0}.applicant-job-v2{margin:0 20px 14px}.applicant-select-action{margin:0 20px 10px;display:flex;justify-content:flex-end}.applicant-select-action button{border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:650;padding:5px 3px}.applicant-bulk-bar{margin:0 20px 10px!important;border-radius:14px!important;padding:9px 11px!important}.applicant-bulk-bar .struct-checkbox span{font-size:12px!important;color:var(--muted)!important}.job-group-title,.section-label.rank-label,.section-label{color:var(--highlight)!important;font-weight:800!important}.job-group-head{min-height:38px!important;display:flex!important;align-items:center!important}.job-group-toggle{width:34px!important;height:34px!important;min-width:34px!important;border-radius:50%!important;display:grid!important;place-items:center!important;font-size:20px!important;line-height:1!important;padding:0!important}.match-row-modern .row-msg{display:none!important}.match-row-modern .row-text{padding-right:5px!important}.match-row-modern .row-name{font-weight:750!important}.match-row-modern .match-row-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.match-row-modern .compat-score{color:var(--highlight)!important;font-weight:800!important}.applicant-checkbox{display:none!important}.applicant-select-mode .applicant-checkbox{display:block!important}.applicant-select-mode .match-row-status-pill{display:none!important}
+/* Hiring process: reliable custom dropdown + wheel */
+.hire-select{position:relative;width:100%}.hire-select>button{width:100%;height:48px;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--on-surface)}.hire-select-menu{display:none;position:absolute;z-index:30;left:0;right:0;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.12);overflow:hidden}.hire-select.open .hire-select-menu{display:block}.hire-select-menu button{display:block;width:100%;border:0;border-bottom:1px solid var(--border);background:var(--surface);padding:12px 14px;text-align:left;color:var(--on-surface);font-size:13px}.hire-select-menu button:last-child{border-bottom:0}.hire-select-menu button.active{color:var(--highlight);font-weight:750}.hiring-custom-input{margin-top:2px}.time-wheel{height:112px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:0!important;overflow:hidden!important}.time-wheel-col{height:112px;overflow-y:auto;scroll-snap-type:y mandatory;border:1px solid var(--border);border-radius:14px;background:var(--surface);padding:34px 0}.time-wheel-col::-webkit-scrollbar{display:none}.time-wheel-opt{height:42px;scroll-snap-align:center;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);border:0;background:transparent;width:100%}.time-wheel-opt.active{font-size:17px;font-weight:800;color:var(--on-surface)}
+/* Job summary */
+.job-summary-hero{margin:0 0 16px;padding:18px;border-radius:20px;background:var(--surface);border:1px solid var(--border)}.job-summary-title{font-family:var(--font-display);font-size:24px;font-weight:850;letter-spacing:-.03em}.job-summary-meta{margin-top:6px;color:var(--muted);font-size:13px}.job-summary-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.job-summary-section{padding:15px 0;border-bottom:1px solid var(--border)}.job-summary-section:last-child{border-bottom:0}.job-summary-section h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--highlight);margin:0 0 8px;font-weight:850}.job-summary-section p{margin:0;font-size:14px;line-height:1.5}.job-summary-chips{display:flex;flex-wrap:wrap;gap:6px}.job-summary-chips span{background:var(--surface-2);padding:7px 10px;border-radius:999px;font-size:12px}
+</style>
+<script id="mutch-fixes-20261002-b">
+// Hiring process dropdown: previous callback received only an option index, so changing a step could not know which row to edit.
+function toggleHireSelect(e,i){e.stopPropagation();document.querySelectorAll('.hire-select.open').forEach(x=>{if(x.id!=='hire-select-'+i)x.classList.remove('open')});document.getElementById('hire-select-'+i)?.classList.toggle('open')}
+function chooseHiringStep(row,label){const st=newJobData.hiring_process[row];if(!st)return;if(label==='Custom step'){st.text='';st.custom=true;st.duration=st.duration||'30 min'}else{st.text=label;st.custom=false;st.duration=['Case study','References call','Decision and offer'].includes(label)?'':(st.duration||'30 min')}renderNewJobForm()}
+function hiringStepRowHTML(s,i){const step=typeof s==='object'?s:{text:s,duration:'30 min'};const presets=['Screening call','Interview with manager','Case study','Presentation','Interview with the CEO','References call','Decision and offer'];const isCustom=!!step.custom||(!presets.includes(step.text));const noTime=['Case study','References call','Decision and offer'].includes(step.text);const shown=isCustom?'Custom step':(step.text||'Choose a step…');return `<div class="hiring-step-row drag-hiring-row" draggable="true" data-hiring-index="${i}" ondragstart="hiringDragStart(event,${i})" ondragover="hiringDragOver(event)" ondrop="hiringDrop(event,${i})" ondragend="hiringDragEnd(event)"><div class="hiring-drag-handle">⋮⋮</div><div class="hiring-step-num">${i+1}</div><div class="hiring-step-fields"><div class="hire-select" id="hire-select-${i}"><button type="button" onclick="toggleHireSelect(event,${i})"><span>${shown}</span><span>⌄</span></button><div class="hire-select-menu">${[...presets,'Custom step'].map(x=>`<button type="button" class="${shown===x?'active':''}" onclick="event.stopPropagation();chooseHiringStep(${i},'${x.replace(/'/g,"\\'")}')">${x}</button>`).join('')}</div></div>${isCustom?`<input class="flat-input hiring-custom-input" placeholder="Write your custom step…" value="${String(step.text||'').replace(/"/g,'&quot;')}" oninput="editHiringStep(${i},this.value)">`:''}${noTime?'':timeWheelHTML(i,step.duration||'30 min')}</div><button class="hiring-step-remove" onclick="removeHiringStep(${i})">${icon('x')}</button></div>`}
+function timeWheelHTML(i,v){const d=parseDuration(v);const hs=[0,1,2,3,4],ms=[0,5,10,15,20,25,30,35,40,45,50,55];return `<div class="time-wheel"><div class="time-wheel-col" data-wheel="h">${hs.map(h=>`<button type="button" class="time-wheel-opt ${d.h===h?'active':''}" onclick="setHiringWheel(${i},${h},null);renderNewJobForm()">${h} h</button>`).join('')}</div><div class="time-wheel-col" data-wheel="m">${ms.map(m=>`<button type="button" class="time-wheel-opt ${d.m===m?'active':''}" onclick="setHiringWheel(${i},null,${m});renderNewJobForm()">${String(m).padStart(2,'0')} min</button>`).join('')}</div></div>`}
+
+// Applicants controls
+let applicantFilterOpen=false, applicantMatchBand='all';
+function pickApplicantJob(i){const jobs=RECRUITER_JOBS.filter(j=>!j.archived);applicantJobView=i===0?'all':(jobs[i-1]?.id||'all');applicantsFilter=applicantJobView==='all'?null:{jobId:applicantJobView,kind:'applicants'};renderApplicants()}
+function runApplicantSearch(){filterApplicantRows();document.querySelector('.applicant-search')?.blur()}
+function toggleApplicantFiltersV2(){applicantFilterOpen=!applicantFilterOpen;document.querySelector('.applicant-filter-panel-v2')?.classList.toggle('show',applicantFilterOpen)}
+function setApplicantMatchBand(v){applicantMatchBand=v;document.querySelectorAll('#screen-list .match-row-modern').forEach(r=>{const n=parseInt(r.querySelector('.compat-score')?.textContent)||0;const ok=v==='all'||(v==='high'&&n>=80)||(v==='mid'&&n>=60&&n<80)||(v==='low'&&n<60);r.style.display=ok?'':'none'});document.querySelectorAll('.applicant-filter-panel-v2 .chip').forEach(c=>c.classList.toggle('on',c.dataset.band===v))}
+const __renderApplicantsFinal=renderApplicants;renderApplicants=function(){__renderApplicantsFinal();const el=document.getElementById('screen-list');if(!el)return;const oldTools=el.querySelector('.applicant-tools');if(oldTools)oldTools.remove();const oldJob=el.querySelector('.applicant-job-select');if(oldJob)oldJob.remove();const title=el.querySelector('.screen-title-row');if(!title)return;const jobs=RECRUITER_JOBS.filter(j=>!j.archived);title.insertAdjacentHTML('afterend',`<div class="applicant-tools-v2"><div class="applicant-search-wrap"><input class="applicant-search" placeholder="Search candidates…" value="${window.applicantSearchText||''}" oninput="window.applicantSearchText=this.value" onkeydown="if(event.key==='Enter')runApplicantSearch()"><button class="applicant-search-go" onclick="runApplicantSearch()">${icon('search')}</button></div><button class="applicant-filter-btn-v2" onclick="toggleApplicantFiltersV2()">Filters</button></div><div class="applicant-filter-panel-v2 ${applicantFilterOpen?'show':''}"><div class="chip-row">${[['all','All matches'],['high','80%+'],['mid','60–79%'],['low','Below 60%']].map(x=>`<span class="chip ${applicantMatchBand===x[0]?'on':''}" data-band="${x[0]}" onclick="setApplicantMatchBand('${x[0]}')">${x[1]}</span>`).join('')}</div></div><div class="applicant-job-v2">${nxSelectHTML('applicant-job-dd','Job offer',['All job offers',...jobs.map(j=>j.title)],applicantJobView==='all'?'All job offers':(jobs.find(j=>j.id===applicantJobView)?.title||'All job offers'),'All job offers','pickApplicantJob')}</div><div class="applicant-select-action"><button onclick="applicantSelectMode=!applicantSelectMode;selectedApplicantIds.clear();renderApplicants()">${applicantSelectMode?'Done selecting':'Select candidates'}</button></div>`);el.classList.toggle('applicant-select-mode',applicantSelectMode);const bulk=el.querySelector('.applicant-bulk-bar');if(bulk && !applicantSelectMode)bulk.remove();document.querySelectorAll('#screen-list .job-group').forEach(g=>{const h=g.querySelector('.job-group-title');if(h&&!h.querySelector('.job-group-toggle'))h.insertAdjacentHTML('beforeend','<button class="job-group-toggle" onclick="event.stopPropagation();this.closest(\'.job-group\').classList.toggle(\'collapsed\')">⌄</button>')});filterApplicantRows();setApplicantMatchBand(applicantMatchBand)};
+
+// Published job opens a read-only summary first; editing remains a deliberate secondary action.
+function openPublishedJobSummary(jobId){const j=RECRUITER_JOBS.find(x=>x.id===jobId);if(!j)return;const chips=a=>(a||[]).map(x=>`<span>${x}</span>`).join('');const salary=(j.salary_min||j.salary_max)?`${j.salary_min||'—'}–${j.salary_max||'—'} ${j.currency||'EUR'} gross / year`:'Not specified';document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="closeDetail()">${icon('back')}</button><div class="detail-title">Job summary</div></div><div class="detail-body"><div class="job-summary-hero"><div class="job-summary-title">${j.title}</div><div class="job-summary-meta">${j.department||'Team not specified'} · ${Array.isArray(j.work_setup)?j.work_setup.join(' · '):(j.work_setup||'')}</div><div class="job-summary-actions"><button class="btn btn-outline" onclick="openJobEdit('${j.id}')">${icon('edit')} Edit</button><button class="btn" onclick="openJobAnalytics('${j.id}')">${icon('barchart')} View analytics</button></div></div><div class="job-summary-section"><h3>Compensation</h3><p>${salary}</p></div><div class="job-summary-section"><h3>Role</h3><p>${j.summary||'No summary added.'}</p></div><div class="job-summary-section"><h3>Must-have skills</h3><div class="job-summary-chips">${chips(j.skills)||'<span>None specified</span>'}</div></div><div class="job-summary-section"><h3>Nice to have</h3><div class="job-summary-chips">${chips(j.nice_skills)||'<span>None specified</span>'}</div></div><div class="job-summary-section"><h3>Hiring process</h3><p>${(j.hiring_process||[]).map((x,i)=>`${i+1}. ${typeof x==='object'?x.text:x}${typeof x==='object'&&x.duration?' · '+x.duration:''}`).join('<br>')||'Not specified'}</p></div><div class="job-summary-section"><h3>Response commitment</h3><p>${j.sla_days||j.response_days||'Not specified'}${String(j.sla_days||'').includes('day')?'':' days'}</p></div></div>`;document.getElementById('detail-overlay').classList.add('show')}
+function openJobAnalytics(jobId){const j=RECRUITER_JOBS.find(x=>x.id===jobId);if(!j)return;document.getElementById('calendar-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="closeCalendar();openPublishedJobSummary('${j.id}')">${icon('back')}</button><div class="detail-title">${icon('barchart')} ${j.title} analytics</div></div><div class="detail-body"><div class="stat-row"><div class="stat-box"><span>VIEWS</span><b>${j.views||j.applicants*6}</b></div><div class="stat-box"><span>APPLICANTS</span><b>${j.applicants}</b></div><div class="stat-box"><span>MATCHES</span><b>${j.matches}</b></div></div>${pctRingHTML(j.applicants?j.matches/j.applicants*100:0,`<b>Applicant → match rate</b><br>${j.applicants?Math.round(j.matches/j.applicants*100):0}% of applicants matched.`,'var(--orange)')}</div>`;document.getElementById('calendar-overlay').classList.add('show')}
+</script>
+
+
+<style id="applicants-mobile-polish-20261002">
+/* Applicants: compact, readable rows on narrow phones. */
+#screen-list .rank-label small{display:none!important}
+#screen-list .rank-label{display:flex!important;align-items:center!important;min-height:34px!important;line-height:1.25!important;padding-right:10px!important;white-space:normal!important}
+#screen-list .compat-score,#screen-list .row-time{color:var(--brand)!important;font-weight:800!important;opacity:1!important}
+#screen-list .applicant-meta-line{font-size:12.5px!important;color:var(--muted)!important;line-height:1.35!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin-top:3px!important}
+#screen-list .row.applied-clean-row .row-text{min-width:0!important;padding-right:8px!important}
+#screen-list .row.applied-clean-row .row-name{font-size:15px!important;line-height:1.2!important}
+#screen-list .row.applied-clean-row .row-sub{font-size:13px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#screen-list .row.applied-clean-row .title-action{flex:0 0 auto!important}
+@media(max-width:430px){
+ #screen-list .section-label.rank-label{font-size:11px!important;letter-spacing:.035em!important}
+ #screen-list .row.applied-clean-row{gap:9px!important}
+ #screen-list .row.applied-clean-row .row-avatar{width:48px!important;height:48px!important;min-width:48px!important}
+ #screen-list .row.applied-clean-row .compat-score{font-size:13px!important;min-width:34px!important;text-align:right!important}
+ #screen-list .row.applied-clean-row .title-action{padding:0 12px!important;min-width:66px!important}
+}
+</style>
+<script id="applicants-mobile-polish-20261002-script">
+function applicantCityOnly(value){
+  const raw=String(value||'').trim(); if(!raw)return 'Location not specified';
+  const parts=raw.split(',').map(x=>x.trim()).filter(Boolean);
+  /* Never expose a street/address in the compact list. If there are several parts, prefer city-like part. */
+  if(parts.length>=2){
+    const first=parts[0];
+    if(/\d/.test(first) || /\b(st|street|road|rd|avenue|ave|boulevard|blvd|rue|via|calle|plaza|place)\b/i.test(first)) return parts[1];
+    return first;
+  }
+  return raw.replace(/^.*?\d+\s+/,'');
+}
+function applicantWorkSetup(c){
+  const v=c?.work_setup ?? c?.workSetup ?? c?.preferred_work_setup ?? c?.work_mode;
+  if(Array.isArray(v)) return v[0]||'Flexible';
+  return String(v||'Flexible').replace('Remote-first','Remote');
+}
+function applicantSalary(c){
+  const v=c?.salary ?? c?.expected_salary ?? c?.salary_min ?? c?.min_salary;
+  if(v===undefined||v===null||v==='') return 'Salary not specified';
+  let t=String(v).trim();
+  if(/^\d+$/.test(t)){const n=Number(t);t=n>=1000?Math.round(n/1000)+'K€ min':n+'€ min';}
+  else if(!/€/.test(t) && /\d/.test(t)) t=t.replace(/\bEUR\b/gi,'€');
+  return t.replace(/€\s*K/gi,'K€').replace(/K\s*€/gi,'K€');
+}
+function appliedRowHTML(c){
+  const score=c._score ?? computeCandidateMatchScore(c);
+  return `<div class="row applied-clean-row">
+    <div class="row-avatar" style="overflow:hidden" onclick="openCandidateDetail('${c.id}')">${avatarSVG(c.name,52)}</div>
+    <div class="row-text" onclick="openCandidateDetail('${c.id}')">
+      <div class="row-name">${c.name}</div>
+      <div class="row-sub">${c.headline||c.title||'Candidate'}</div>
+      <div class="applicant-meta-line">${applicantSalary(c)} · ${applicantWorkSetup(c)} · ${applicantCityOnly(c.location)}</div>
+    </div>
+    <div class="compat-score">${score}%</div>
+    <button class="title-action" onclick="event.stopPropagation(); openMatch(${JSON.stringify(c).replace(/"/g,'&quot;')})">Match</button>
+  </div>`;
+}
+/* Enrich existing match rows with the same compact candidate facts whenever a backing profile exists. */
+const __matchRowApplicantsPolish=matchRowHTML;
+matchRowHTML=function(m){
+  const c=CANDIDATES.find(x=>'m-'+x.id===m.id || x.id===m.candidate_id);
+  if(!c) return __matchRowApplicantsPolish(m);
+  const selected=selectedApplicantIds.has(m.id), statusInfo=matchRowStatusInfo(m);
+  return `<div class="row match-row-modern applied-clean-row">
+    <input type="checkbox" class="applicant-checkbox" ${selected?'checked':''} onclick="event.stopPropagation(); toggleApplicantSelect('${m.id}')" />
+    <div class="row-avatar match-row-avatar" onclick="openCandidateDetailByMatch('${m.id}')">${m.initials||avatarSVG(c.name,52)}</div>
+    <div class="row-text match-row-text" onclick="openCandidateDetailByMatch('${m.id}')"><div class="row-name">${m.name||c.name}</div><div class="row-sub">${m.subtitle||c.headline||''}</div><div class="applicant-meta-line">${applicantSalary(c)} · ${applicantWorkSetup(c)} · ${applicantCityOnly(c.location)}</div></div>
+    ${m.status!=='invited'?`<span class="compat-score">${matchCompatScore(m)}%</span>`:''}
+    <span class="match-row-status-pill" onclick="openCandidateDetailByMatch('${m.id}')" style="background:${statusInfo.bg};color:${statusInfo.color}">${statusInfo.shortLabel}</span>
+    <button class="icon-btn" style="flex-shrink:0" onclick="event.stopPropagation(); openApplicantRowMenu('${m.id}')">${icon('more')}</button>
+  </div>`;
+};
+/* Remove the redundant ranking copy; order itself already communicates ranking. */
+const __renderApplicantsCompact=renderApplicants;
+renderApplicants=function(){__renderApplicantsCompact();document.querySelectorAll('#screen-list .rank-label small').forEach(x=>x.remove());};
+</script>
+\n<style id="ux-interview-report-patch">
+#menu-overlay.show{z-index:10050!important}.co-logo-field{align-items:center!important;gap:10px!important}.co-logo-tile[style*="background-image"]{background-size:cover!important;background-color:transparent!important;border:none!important;box-shadow:none!important}.co-logo-copy{min-width:110px}.co-logo-copy small{display:block;line-height:1.3}.co-logo-field .bn-upload{flex:0 0 auto;padding:9px 12px!important}.report-job-link{width:100%;border:0;background:transparent;color:var(--muted);font:600 13px var(--font-body);padding:14px 4px;display:flex;gap:8px;align-items:center;justify-content:center}.report-job-link .icon{width:15px;height:15px}.interview-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px}.interview-summary-card h3{margin:0 0 4px;font:800 19px var(--font-display)}.interview-meta{display:grid;gap:10px;margin-top:14px}.interview-meta-row{display:flex;gap:10px;align-items:flex-start}.interview-meta-row .icon{width:17px;height:17px;color:var(--brand);margin-top:2px}.interview-actions{display:grid;gap:9px;margin-top:16px}.interview-danger{color:var(--error)!important}.report-option{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;border-bottom:1px solid var(--border);font-weight:650}.report-option:last-child{border-bottom:0}.report-radio{display:flex;gap:10px;align-items:flex-start;padding:12px 0}.report-radio input{width:20px;height:20px;accent-color:var(--brand);flex:0 0 auto}.cal-item{cursor:pointer}
+</style>
+<script id="ux-interview-report-patch-js">
+function pickSalaryType(v){newJobData.salary_type=v;if(v==='Exact salary'&&newJobData.salary_exact){newJobData.salary_min=newJobData.salary_exact;newJobData.salary_max=newJobData.salary_exact}renderNewJobForm()}
+function interviewDefaultForMatch(m){return {id:'iv-'+m.id,candidate:m.name,role:m.subtitle||'Candidate interview',company:COMPANY_PROFILE.name,date:'',time:'',timezone:'Europe/Paris',duration:'45 min',format:'Video call',location:'',link:'',interviewers:'',agenda:'',preparation:'',contact:'',status:'Scheduled',matchId:m.id,jobId:m.job_id||''}}
+function openInterviewScheduler(matchId){const m=matchesData.find(x=>x.id===matchId);if(!m)return;m.interview=m.interview||interviewDefaultForMatch(m);const v=m.interview;document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openStatusPicker('${matchId}')">${icon('back')}</button><div class="detail-title">Schedule interview</div></div><div class="detail-body"><div class="match-note">Add the details the candidate needs in one place. Date, time, timezone, format and joining details are the essentials.</div><div class="field"><label>Date</label><input id="iv-date" type="date" value="${v.date||''}"></div><div class="field"><label>Time</label><input id="iv-time" type="time" value="${v.time||''}"></div><div class="field"><label>Timezone</label><input id="iv-zone" value="${v.timezone||''}" placeholder="Europe/Paris"></div><div class="field"><label>Estimated duration</label><input id="iv-duration" value="${v.duration||''}" placeholder="45 min"></div><div class="onb-field-label">Interview format</div><div class="chip-row">${['Video call','Phone call','On-site'].map(x=>'<span class="chip '+(v.format===x?'on':'')+'" onclick="pickInterviewFormat(this, \' '+x+' \')">'+x+'</span>').join('')}</div><input type="hidden" id="iv-format" value="${v.format||'Video call'}"><div class="field"><label>Interview link or location</label><input id="iv-link" value="${v.link||v.location||''}" placeholder="Meeting link or full office address"></div><div class="field"><label>Interviewers</label><input id="iv-interviewers" value="${v.interviewers||''}" placeholder="Names and roles"></div><div class="field"><label>What to expect</label><textarea id="iv-agenda" placeholder="Format, topics, case study, presentation…">${v.agenda||''}</textarea></div><div class="field"><label>Preparation / what to bring <span style="color:var(--muted)">(optional)</span></label><textarea id="iv-prep" placeholder="Portfolio, ID, presentation, anything useful…">${v.preparation||''}</textarea></div><div class="field"><label>Contact if they need help <span style="color:var(--muted)">(optional)</span></label><input id="iv-contact" value="${v.contact||''}" placeholder="Recruiter name or contact"></div><button class="btn btn-full btn-brand" onclick="saveInterview('${matchId}')">${icon('check')} Send interview invitation</button></div>`;document.getElementById('detail-overlay').classList.add('show')}
+function saveInterview(matchId){const m=matchesData.find(x=>x.id===matchId);if(!m)return;const g=id=>(document.getElementById(id)?.value||'').trim();if(!g('iv-date')||!g('iv-time')||!g('iv-link')){showToast('Add date, time and interview link/location');return}m.interview={...(m.interview||{}),candidate:m.name,role:m.subtitle,company:COMPANY_PROFILE.name,date:g('iv-date'),time:g('iv-time'),timezone:g('iv-zone'),duration:g('iv-duration'),format:g('iv-format'),link:g('iv-link'),interviewers:g('iv-interviewers'),agenda:g('iv-agenda'),preparation:g('iv-prep'),contact:g('iv-contact'),status:'Scheduled',matchId:m.id,jobId:m.job_id};m.app_status='Interview scheduled';syncInterviewCalendars(m);closeDetail();showToast('Interview invitation sent')}
+function syncInterviewCalendars(m){const iv=m.interview;if(!iv)return;const d=iv.date?new Date(iv.date+'T12:00:00'):new Date();const day=String(d.getDate()).padStart(2,'0'),mon=d.toLocaleString('en',{month:'short'}).toUpperCase();const rec={day,mon,title:`Interview — ${m.name}`,sub:`${m.subtitle||'Role'} · ${iv.time||''}`,interview:iv};calendarEvents.recruiter=calendarEvents.recruiter.filter(e=>e.interview?.matchId!==m.id);calendarEvents.recruiter.unshift(rec);calendarEvents.candidate=calendarEvents.candidate.filter(e=>e.interview?.matchId!==m.id);calendarEvents.candidate.unshift({...rec,title:`Interview — ${COMPANY_PROFILE.name}`})}
+const _setMatchStatusV2=setMatchStatus;setMatchStatus=function(matchId,status){if(status==='Interview scheduled'){openInterviewScheduler(matchId);return}_setMatchStatusV2(matchId,status)};
+function openInterviewSummary(i){const e=calendarEvents[app][i];if(!e)return;const iv=e.interview||{company:e.title.replace(/^Interview — /,''),role:e.sub.split(' · ')[0],date:`${e.day} ${e.mon}`,time:e.sub.split(' · ')[1]||'',timezone:'Local time',duration:'45 min',format:'Video call',link:'#',interviewers:'Hiring team',agenda:'Conversation about the role and your experience.',preparation:'Review the role and prepare a few questions.'};document.getElementById('calendar-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openCalendar()">${icon('back')}</button><div class="detail-title">Interview details</div></div><div class="list-scroll"><div class="interview-summary-card"><h3>${app==='candidate'?(iv.company||'Company'):(iv.candidate||e.title.replace(/^Interview — /,''))}</h3><div style="color:var(--muted)">${iv.role||''}</div><div class="interview-meta"><div class="interview-meta-row">${icon('calendar')}<div><b>${iv.date||e.day+' '+e.mon}</b><br><span>${iv.time||''} · ${iv.timezone||''} · ${iv.duration||''}</span></div></div><div class="interview-meta-row">${icon('briefcase')}<div><b>${iv.format||'Interview'}</b><br><span>${iv.interviewers||'Hiring team'}</span></div></div>${iv.agenda?`<div class="interview-meta-row">${icon('info')}<div><b>What to expect</b><br><span>${iv.agenda}</span></div></div>`:''}${iv.preparation?`<div class="interview-meta-row">${icon('sparkle')}<div><b>Preparation</b><br><span>${iv.preparation}</span></div></div>`:''}</div><div class="interview-actions">${app==='candidate'?`<button class="btn btn-full btn-brand" onclick="${iv.jobId?`closeCalendar();openInterviewTips('${iv.jobId}')`:`closeCalendar();openAI()`}">${icon('sparkle')} Prepare for interview</button><button class="btn btn-full btn-outline" onclick="showToast('Opening interview link…')">${icon('link')} Join interview</button>`:`<button class="btn btn-full btn-brand" onclick="closeCalendar();openInterviewScheduler('${iv.matchId||''}')">Edit interview</button><button class="btn btn-full btn-outline" onclick="showToast('Reschedule flow opened')">Reschedule</button><button class="title-action interview-danger" onclick="showToast('Interview cancelled')">Cancel interview</button>`}</div></div></div>`;document.getElementById('calendar-overlay').classList.add('show')}
+function openReportJob(jobId){document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openJobDetail('${jobId}')">${icon('back')}</button><div class="detail-title">Report this job</div></div><div class="detail-body"><div class="detail-text" style="margin-bottom:8px">Tell us what seems wrong. Reports are reviewed and don't notify the company who submitted them.</div>${['Spam, scam or suspicious activity','Discriminatory or offensive content','Incorrect or misleading job information','Illegal or regulated content','Other'].map((x,i)=>`<div class="report-option" onclick="openReportReason('${jobId}',${i},'${x.replace(/'/g,"\\'")}')"><span>${x}</span>${icon('chevron')}</div>`).join('')}</div>`;document.getElementById('detail-overlay').classList.add('show')}
+function openReportReason(jobId,i,label){document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openReportJob('${jobId}')">${icon('back')}</button><div class="detail-title">Tell us a little more</div></div><div class="detail-body"><div class="detail-block-label">${label}</div>${['The listing asks for money or sensitive information','The company or role appears misleading','The content may be discriminatory or offensive','The role appears illegal or unsafe','Something else'].map((x,j)=>`<label class="report-radio"><input type="radio" name="report-reason" value="${j}"><span>${x}</span></label>`).join('')}<div class="field"><label>Additional details <span style="color:var(--muted)">(optional)</span></label><textarea placeholder="Anything else that would help us review this report"></textarea></div><button class="btn btn-full btn-brand" onclick="closeDetail();showToast('Report submitted — thank you')">Submit report</button></div>`}
+</script>
+<style id="ux-interview-report-patch">
+#menu-overlay.show{z-index:10050!important}.co-logo-field{align-items:center!important;gap:10px!important}.co-logo-tile[style*="background-image"]{background-size:cover!important;background-color:transparent!important;border:none!important;box-shadow:none!important}.co-logo-copy{min-width:110px}.co-logo-copy small{display:block;line-height:1.3}.co-logo-field .bn-upload{flex:0 0 auto;padding:9px 12px!important}.report-job-link{width:100%;border:0;background:transparent;color:var(--muted);font:600 13px var(--font-body);padding:14px 4px;display:flex;gap:8px;align-items:center;justify-content:center}.report-job-link .icon{width:15px;height:15px}.interview-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:12px}.interview-summary-card h3{margin:0 0 4px;font:800 19px var(--font-display)}.interview-meta{display:grid;gap:10px;margin-top:14px}.interview-meta-row{display:flex;gap:10px;align-items:flex-start}.interview-meta-row .icon{width:17px;height:17px;color:var(--brand);margin-top:2px}.interview-actions{display:grid;gap:9px;margin-top:16px}.interview-danger{color:var(--error)!important}.report-option{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;border-bottom:1px solid var(--border);font-weight:650}.report-option:last-child{border-bottom:0}.report-radio{display:flex;gap:10px;align-items:flex-start;padding:12px 0}.report-radio input{width:20px;height:20px;accent-color:var(--brand);flex:0 0 auto}.cal-item{cursor:pointer}
+</style>
+<script id="ux-interview-report-patch-js">
+function pickSalaryType(v){newJobData.salary_type=v;if(v==='Exact salary'&&newJobData.salary_exact){newJobData.salary_min=newJobData.salary_exact;newJobData.salary_max=newJobData.salary_exact}renderNewJobForm()}
+function interviewDefaultForMatch(m){return {id:'iv-'+m.id,candidate:m.name,role:m.subtitle||'Candidate interview',company:COMPANY_PROFILE.name,date:'',time:'',timezone:'Europe/Paris',duration:'45 min',format:'Video call',location:'',link:'',interviewers:'',agenda:'',preparation:'',contact:'',status:'Scheduled',matchId:m.id,jobId:m.job_id||''}}
+function pickInterviewFormat(el,v){document.querySelectorAll('.chip-row .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');document.getElementById('iv-format').value=v.trim()}
+function openInterviewScheduler(matchId){const m=matchesData.find(x=>x.id===matchId);if(!m)return;m.interview=m.interview||interviewDefaultForMatch(m);const v=m.interview;document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openStatusPicker('${matchId}')">${icon('back')}</button><div class="detail-title">Schedule interview</div></div><div class="detail-body"><div class="match-note">Add the details the candidate needs in one place. Date, time, timezone, format and joining details are the essentials.</div><div class="field"><label>Date</label><input id="iv-date" type="date" value="${v.date||''}"></div><div class="field"><label>Time</label><input id="iv-time" type="time" value="${v.time||''}"></div><div class="field"><label>Timezone</label><input id="iv-zone" value="${v.timezone||''}" placeholder="Europe/Paris"></div><div class="field"><label>Estimated duration</label><input id="iv-duration" value="${v.duration||''}" placeholder="45 min"></div><div class="onb-field-label">Interview format</div><div class="chip-row">${['Video call','Phone call','On-site'].map(x=>'<span class="chip '+(v.format===x?'on':'')+'" onclick="pickInterviewFormat(this, \' '+x+' \')">'+x+'</span>').join('')}</div><input type="hidden" id="iv-format" value="${v.format||'Video call'}"><div class="field"><label>Interview link or location</label><input id="iv-link" value="${v.link||v.location||''}" placeholder="Meeting link or full office address"></div><div class="field"><label>Interviewers</label><input id="iv-interviewers" value="${v.interviewers||''}" placeholder="Names and roles"></div><div class="field"><label>What to expect</label><textarea id="iv-agenda" placeholder="Format, topics, case study, presentation…">${v.agenda||''}</textarea></div><div class="field"><label>Preparation / what to bring <span style="color:var(--muted)">(optional)</span></label><textarea id="iv-prep" placeholder="Portfolio, ID, presentation, anything useful…">${v.preparation||''}</textarea></div><div class="field"><label>Contact if they need help <span style="color:var(--muted)">(optional)</span></label><input id="iv-contact" value="${v.contact||''}" placeholder="Recruiter name or contact"></div><button class="btn btn-full btn-brand" onclick="saveInterview('${matchId}')">${icon('check')} Send interview invitation</button></div>`;document.getElementById('detail-overlay').classList.add('show')}
+function saveInterview(matchId){const m=matchesData.find(x=>x.id===matchId);if(!m)return;const g=id=>(document.getElementById(id)?.value||'').trim();if(!g('iv-date')||!g('iv-time')||!g('iv-link')){showToast('Add date, time and interview link/location');return}m.interview={...(m.interview||{}),candidate:m.name,role:m.subtitle,company:COMPANY_PROFILE.name,date:g('iv-date'),time:g('iv-time'),timezone:g('iv-zone'),duration:g('iv-duration'),format:g('iv-format'),link:g('iv-link'),interviewers:g('iv-interviewers'),agenda:g('iv-agenda'),preparation:g('iv-prep'),contact:g('iv-contact'),status:'Scheduled',matchId:m.id,jobId:m.job_id};m.app_status='Interview scheduled';syncInterviewCalendars(m);closeDetail();showToast('Interview invitation sent')}
+function syncInterviewCalendars(m){const iv=m.interview;if(!iv)return;const d=iv.date?new Date(iv.date+'T12:00:00'):new Date();const day=String(d.getDate()).padStart(2,'0'),mon=d.toLocaleString('en',{month:'short'}).toUpperCase();const rec={day,mon,title:`Interview — ${m.name}`,sub:`${m.subtitle||'Role'} · ${iv.time||''}`,interview:iv};calendarEvents.recruiter=calendarEvents.recruiter.filter(e=>e.interview?.matchId!==m.id);calendarEvents.recruiter.unshift(rec);calendarEvents.candidate=calendarEvents.candidate.filter(e=>e.interview?.matchId!==m.id);calendarEvents.candidate.unshift({...rec,title:`Interview — ${COMPANY_PROFILE.name}`})}
+const _setMatchStatusV2=setMatchStatus;setMatchStatus=function(matchId,status){if(status==='Interview scheduled'){openInterviewScheduler(matchId);return}_setMatchStatusV2(matchId,status)};
+function openInterviewSummary(i){const e=calendarEvents[app][i];if(!e)return;const iv=e.interview||{company:e.title.replace(/^Interview — /,''),role:e.sub.split(' · ')[0],date:`${e.day} ${e.mon}`,time:e.sub.split(' · ')[1]||'',timezone:'Local time',duration:'45 min',format:'Video call',link:'#',interviewers:'Hiring team',agenda:'Conversation about the role and your experience.',preparation:'Review the role and prepare a few questions.'};document.getElementById('calendar-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openCalendar()">${icon('back')}</button><div class="detail-title">Interview details</div></div><div class="list-scroll"><div class="interview-summary-card"><h3>${app==='candidate'?(iv.company||'Company'):(iv.candidate||e.title.replace(/^Interview — /,''))}</h3><div style="color:var(--muted)">${iv.role||''}</div><div class="interview-meta"><div class="interview-meta-row">${icon('calendar')}<div><b>${iv.date||e.day+' '+e.mon}</b><br><span>${iv.time||''} · ${iv.timezone||''} · ${iv.duration||''}</span></div></div><div class="interview-meta-row">${icon('briefcase')}<div><b>${iv.format||'Interview'}</b><br><span>${iv.interviewers||'Hiring team'}</span></div></div>${iv.agenda?`<div class="interview-meta-row">${icon('info')}<div><b>What to expect</b><br><span>${iv.agenda}</span></div></div>`:''}${iv.preparation?`<div class="interview-meta-row">${icon('sparkle')}<div><b>Preparation</b><br><span>${iv.preparation}</span></div></div>`:''}</div><div class="interview-actions">${app==='candidate'?`<button class="btn btn-full btn-brand" onclick="${iv.jobId?`closeCalendar();openInterviewTips('${iv.jobId}')`:`closeCalendar();openAI()`}">${icon('sparkle')} Prepare for interview</button><button class="btn btn-full btn-outline" onclick="showToast('Opening interview link…')">${icon('link')} Join interview</button>`:`<button class="btn btn-full btn-brand" onclick="closeCalendar();openInterviewScheduler('${iv.matchId||''}')">Edit interview</button><button class="btn btn-full btn-outline" onclick="showToast('Reschedule flow opened')">Reschedule</button><button class="title-action interview-danger" onclick="showToast('Interview cancelled')">Cancel interview</button>`}</div></div></div>`;document.getElementById('calendar-overlay').classList.add('show')}
+function openReportJob(jobId){document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openJobDetail('${jobId}')">${icon('back')}</button><div class="detail-title">Report this job</div></div><div class="detail-body"><div class="detail-text" style="margin-bottom:8px">Tell us what seems wrong. Reports are reviewed and don't notify the company who submitted them.</div>${['Spam, scam or suspicious activity','Discriminatory or offensive content','Incorrect or misleading job information','Illegal or regulated content','Other'].map((x,i)=>`<div class="report-option" onclick="openReportReason('${jobId}',${i},'${x.replace(/'/g,"\\'")}')"><span>${x}</span>${icon('chevron')}</div>`).join('')}</div>`;document.getElementById('detail-overlay').classList.add('show')}
+function openReportReason(jobId,i,label){document.getElementById('detail-overlay').innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openReportJob('${jobId}')">${icon('back')}</button><div class="detail-title">Tell us a little more</div></div><div class="detail-body"><div class="detail-block-label">${label}</div>${['The listing asks for money or sensitive information','The company or role appears misleading','The content may be discriminatory or offensive','The role appears illegal or unsafe','Something else'].map((x,j)=>`<label class="report-radio"><input type="radio" name="report-reason" value="${j}"><span>${x}</span></label>`).join('')}<div class="field"><label>Additional details <span style="color:var(--muted)">(optional)</span></label><textarea placeholder="Anything else that would help us review this report"></textarea></div><button class="btn btn-full btn-brand" onclick="closeDetail();showToast('Report submitted — thank you')">Submit report</button></div>`}
 </script>
 </body>
 </html>
