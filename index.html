@@ -1502,6 +1502,38 @@
   transition-timing-function: ease !important;
 }
 </style>
+<style id="mobile-viewport-final-fix">
+/* Final mobile viewport reset: the desktop device frame must never leak into the real mobile UI. */
+@media (max-width: 520px), (hover: none) and (pointer: coarse) {
+  html, body {
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    min-height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    overflow: hidden;
+    background: var(--surface) !important;
+  }
+  body { align-items: stretch !important; }
+  #phone {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+  footer.note { display: none !important; }
+}
+</style>
+
 </head>
 <body data-app="candidate">
 
