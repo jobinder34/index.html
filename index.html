@@ -7837,7 +7837,7 @@ function downloadCandidateCvPdf(name) {
   margin:0!important;
   padding:0!important;
   border:0!important;
-  border-radius:999px!important;
+  border-radius:2px!important;
   background:var(--brand)!important;
   background-image:none!important;
   -webkit-mask:none!important;
@@ -11514,9 +11514,9 @@ openPublishedJobSummary=function(jobId){
   top:50%!important;
   bottom:auto!important;
   width:3px!important;
-  height:1em!important;
-  min-height:0!important;
-  max-height:none!important;
+  height:1.35em!important;
+  min-height:18px!important;
+  max-height:24px!important;
   border:0!important;
   border-radius:999px!important;
   background:var(--brand)!important;
@@ -11577,4 +11577,13 @@ openPublishedJobSummary=function(jobId){
   .company-multiselect-option.selected .company-check{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
   .company-check .icon{width:13px;height:13px}
   .edit-save-now{position:sticky;bottom:8px;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+</style>
+
+<style id="role-select-background-hotfix">
+/* Restore the role-selection screen background. This intentionally overrides
+   the later grey role-select rule without changing its menu/layout. */
+body #screen-role-select,
+body[data-theme="dark"] #screen-role-select {
+  background: #1b1714 !important;
+}
 </style>
