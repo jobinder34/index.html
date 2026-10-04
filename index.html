@@ -1232,7 +1232,7 @@
 
   /* Discover card: full-bleed photo hero (same language as role select) + clean body. */
   .card.card-photo { padding: 0; border-radius: 28px; }
-  .nx-photo { position: relative; flex: 1 1 auto; min-height: 156px; margin: 6px 6px 0; border-radius: 22px; overflow: hidden; background-color: var(--on-surface); background-size: cover; background-position: center 22%; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; }
+  .nx-photo { position: relative; flex: 1 1 auto; min-height: 156px; margin: 0; border-radius: 28px 28px 0 0; overflow: hidden; background-color: var(--on-surface); background-size: cover; background-position: center 22%; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; }
   .nx-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,8,6,0.28) 0%, rgba(10,8,6,0) 26%, rgba(10,8,6,0) 45%, rgba(10,8,6,0.82) 100%); pointer-events: none; }
   .nx-photo-ink { background-color: #16130F; }
   .nx-photo-ink::before { content: attr(data-mark); position: absolute; right: -10px; top: 50%; transform: translateY(-58%); font-family: var(--font-display); font-weight: 800; font-size: 170px; line-height: 1; letter-spacing: -0.06em; color: var(--brand); opacity: 0.16; pointer-events: none; }
@@ -1470,6 +1470,22 @@
 @media (max-width: 380px) {
   .application-status-btn { font-size:11.5px; gap:5px; padding-left:8px; padding-right:8px; }
 }
+
+/* Settings: every section heading gets the same breathing room */
+#calendar-overlay .detail-body .detail-block-label { margin-top: 32px !important; }
+#calendar-overlay .detail-body > .detail-block-label:first-child { margin-top: 4px !important; }
+#calendar-overlay .settings-row:has(+ .detail-block-label),
+#calendar-overlay .settings-row:has(+ div > .detail-block-label:first-child) { border-bottom: 0 !important; }
+
+/* Diary toolbar + entries */
+.diary-tools { display: flex; gap: 10px; align-items: center; padding: 4px 20px 6px; }
+.diary-tools .ap3-search { flex: 1 1 auto; }
+.diary-tools .u-sel { flex: 0 0 148px; }
+.diary-tools .u-sel-trigger { height: 46px; border-radius: 14px; }
+.diary-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.diary-meta svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.diary-count { padding: 6px 20px 2px; font-size: 13px; color: var(--muted); }
+.diary-empty-search { padding: 32px 24px; text-align: center; color: var(--muted); font-size: 14px; }
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -2001,7 +2017,7 @@ const JOBS = [
     publish_date:"2 days ago", applicants_count:12, matched_count:1, languages:["French (Native)","English (C1)"],
     hiring_process:["Screening call","In-person interview","Trial shift","Offer"],
     response_days:7, favorited:false },
-  { id:"j30", company:"Meridian Bank", location:"Remote · Europe", role:"Frontend Engineer",
+  { id:"j30", company:"Meridian Bank", location:"Remote ������ Europe", role:"Frontend Engineer",
     salary:"€77k – €174k/yr", gated:false, tags:["Kubernetes", "React", "TypeScript", "Docker", "Go", "GraphQL", "Node.js", "Python"],
     company_blurb:"Series B company · remote-first",
     why_for_you:"Your background lines up with what this frontend engineer role is looking for.",
@@ -2446,7 +2462,7 @@ const JOBS = [
     company_blurb:"Series A company · hybrid culture",
     why_for_you:"Your background lines up with what this design lead role is looking for.",
     description:"Join Kindling Studio as a Design Lead, working closely with the team to deliver real impact in design.",
-    requirements_summary:"Relevant experience in User Testing · Strong communication skills",
+    requirements_summary:"Relevant experience in User Testing ���� Strong communication skills",
     benefits:["Health insurance", "Equity", "4-day week"],
     publish_date:"Today", applicants_count:31, matched_count:4, languages:["English (C1)", "English (Native)"],
     hiring_process:["Recruiter screen", "Case study", "Panel interview", "Offer"],
@@ -4121,7 +4137,7 @@ const CANDIDATES = [
     summary:"Mobile Engineer with 7 yrs of experience, skilled in Python, GraphQL.",
     experience:[{role:"Mobile Engineer", company:"Driftcloud", duration:"2021 – now · 5 yrs", responsibilities:"Worked hands-on with Python, GraphQL in a engineering team."}], favorited:false },
   { id:"c7", name:"Kai Johansson", headline:"Cloud Engineer", location:"Bangalore, India", applied:false,
-    salary:"€128k min · EUR", work_setup:"Remote · Flexible", available_from:"29/09/2026",
+    salary:"€128k min · EUR", work_setup:"Remote �� Flexible", available_from:"29/09/2026",
     skills:["Go", "AWS", "Python", "Docker"], languages:["English (B2)"], field:"Engineering",
     summary:"Cloud Engineer with 1 yrs of experience, skilled in Go, AWS.",
     experience:[{role:"Cloud Engineer", company:"Klarafy", duration:"2025 – now · 1 yrs", responsibilities:"Worked hands-on with Go, AWS in a engineering team."}], favorited:false },
@@ -4599,7 +4615,7 @@ const CANDIDATES = [
     salary:"€82k min · EUR", work_setup:"On-site", available_from:"15/11/2026",
     skills:["Python", "Machine Learning", "Statistics"], languages:["English (Native)"], field:"Data",
     summary:"BI Analyst with 6 yrs of experience, skilled in Python, Machine Learning.",
-    experience:[{role:"BI Analyst", company:"Harborline", duration:"2021 �� now · 5 yrs", responsibilities:"Worked hands-on with Python, Machine Learning in a data team."}], favorited:false },
+    experience:[{role:"BI Analyst", company:"Harborline", duration:"2021 ���� now · 5 yrs", responsibilities:"Worked hands-on with Python, Machine Learning in a data team."}], favorited:false },
   { id:"c103", name:"Ling Novak", headline:"Data Engineer", location:"Krakow, Poland", applied:false,
     salary:"€76k min · EUR", work_setup:"Remote · Global", available_from:"01/10/2026",
     skills:["Python", "Tableau"], languages:["English (Native)"], field:"Data",
@@ -4616,7 +4632,7 @@ const CANDIDATES = [
     summary:"Growth Marketing Lead with 12 yrs of experience, skilled in Analytics, Copywriting.",
     experience:[{role:"Growth Marketing Lead", company:"Emberly", duration:"2021 – now · 5 yrs", responsibilities:"Worked hands-on with Analytics, Copywriting in a marketing team."}], favorited:false },
   { id:"c106", name:"Nadia Lopez", headline:"Content Marketing Manager", location:"Remote · US/Canada", applied:true,
-    salary:"€43k min · EUR", work_setup:"Remote · Flexible", available_from:"01/10/2026",
+    salary:"��43k min · EUR", work_setup:"Remote · Flexible", available_from:"01/10/2026",
     skills:["Paid Ads", "SEO", "Email Marketing", "Copywriting"], languages:["English (C1)"], field:"Marketing",
     summary:"Content Marketing Manager with 3 yrs of experience, skilled in Paid Ads, SEO.",
     experience:[{role:"Content Marketing Manager", company:"Harborline", duration:"2023 – now · 3 yrs", responsibilities:"Worked hands-on with Paid Ads, SEO in a marketing team."}], favorited:false },
@@ -4646,7 +4662,7 @@ const CANDIDATES = [
     summary:"Social Media Manager with 12 yrs of experience, skilled in SEO, Copywriting.",
     experience:[{role:"Social Media Manager", company:"Northlight", duration:"2021 – now · 5 yrs", responsibilities:"Worked hands-on with SEO, Copywriting in a marketing team."}], favorited:false },
   { id:"c112", name:"Valentina Chen", headline:"SEO Specialist", location:"Remote · Worldwide", applied:false,
-    salary:"€111k min · EUR", work_setup:"Remote · Flexible", available_from:"29/10/2026",
+    salary:"���111k min �� EUR", work_setup:"Remote · Flexible", available_from:"29/10/2026",
     skills:["SEO", "Copywriting", "Email Marketing", "Analytics"], languages:["English (Native)"], field:"Marketing",
     summary:"SEO Specialist with 7 yrs of experience, skilled in SEO, Copywriting.",
     experience:[{role:"SEO Specialist", company:"Fernway", duration:"2021 – now · 5 yrs", responsibilities:"Worked hands-on with SEO, Copywriting in a marketing team."}], favorited:false },
@@ -6618,7 +6634,7 @@ function swipe(direction) {
     if (direction === 'like') {
       if (app === 'candidate') {
         if (!appliedJobs.find(a => a.job.id === item.id)) {
-          appliedJobs.push({ job: item, applied_date:"Today", status:'review', secondsLeft: item.response_days*86400 });
+          appliedJobs.push({ job: item, applied_date:"Today", applied_at:Date.now(), status:'review', secondsLeft: item.response_days*86400 });
         }
         if (isFirstEverSwipe) openFirstSwipeNotifPopup(); else openAppliedPopup(item);
       } else {
@@ -6706,7 +6722,7 @@ function openJobDetail(id) {
 function swipeFromDetail(jobId) {
   const idx = JOBS.findIndex(j => j.id === jobId);
   if (idx === deckIndex) swipe('like');
-  else { if (!appliedJobs.find(a=>a.job.id===jobId)) appliedJobs.push({ job: JOBS[idx], applied_date:"Today", status:'review', secondsLeft: JOBS[idx].response_days*86400 }); openAppliedPopup(JOBS[idx]); }
+  else { if (!appliedJobs.find(a=>a.job.id===jobId)) appliedJobs.push({ job: JOBS[idx], applied_date:"Today", applied_at:Date.now(), status:'review', secondsLeft: JOBS[idx].response_days*86400 }); openAppliedPopup(JOBS[idx]); }
 }
 function openCandidateDetail(id, matchId) {
   const c = CANDIDATES.find(x => x.id === id);
@@ -7960,30 +7976,79 @@ function openDiary() {
     ...matchesData.filter(m => m.status !== 'invited').map(m => ({ role: m.subtitle, company: m.company_name || m.name, status: m.app_status || 'Reviewing candidacy', reason: m.rejection_reason, jobId: null, matchId: m.id })),
     ...appliedJobs.filter(a => !matchesData.find(m => m.id === 'm-'+a.job.id)).map(a => ({ role: a.job.role, company: a.job.company, status: 'Reviewing candidacy', reason: '', jobId: a.job.id })),
   ];
-  const grouped = APPLICATION_STATUSES.map(status => ({ status, items: entries.filter(e => e.status === status) })).filter(g => g.items.length);
-  const diaryRowClick = (e) => {
+  const DAY = 86400000;
+  const seedDaysAgo = (key) => { let h = 0; for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return 1 + (h % 21); };
+  entries.forEach(e => {
+    const applied = e.jobId ? appliedJobs.find(a => a.job.id === e.jobId) : null;
+    const match = e.matchId ? matchesData.find(m => m.id === e.matchId) : null;
+    e.appliedAt = applied?.applied_at || match?.applied_at || (Date.now() - seedDaysAgo(e.matchId || e.jobId || e.company) * DAY);
+  });
+  window._diaryEntries = entries;
+  window._diaryState = window._diaryState || { q: '', sort: 'recent' };
+  const S = window._diaryState;
+  const sortOptions = [
+    { v: 'recent', l: 'Most recent' },
+    { v: 'oldest', l: 'Oldest first' },
+    { v: 'status', l: 'By status' },
+    { v: 'company', l: 'Company A–Z' },
+  ];
+  document.getElementById('calendar-overlay').innerHTML = `
+    <div class="detail-header"><button class="chat-back" onclick="backToMenu()">${icon('back')}</button><div class="detail-title">${icon('cardlist')} Diary</div></div>
+    ${entries.length ? `<div class="diary-tools">
+      <label class="ap3-search">${icon('search')}<span class="sr-only">Search applications</span><input type="search" id="diary-q" placeholder="Company, role or status" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search" oninput="window._diaryState.q=this.value;renderDiaryList()"></label>
+      ${uSelectHTML('diary-sort', sortOptions, S.sort, v => { window._diaryState.sort = v; openDiary(); }, { label: 'Sort applications' })}
+    </div>` : ''}
+    <div class="list-scroll" id="diary-list"></div>`;
+  renderDiaryList();
+  document.getElementById('calendar-overlay').classList.add('show');
+}
+
+function formatDiaryDate(ts) {
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderDiaryList() {
+  const list = document.getElementById('diary-list');
+  if (!list) return;
+  const entries = window._diaryEntries || [];
+  const S = window._diaryState || { q: '', sort: 'recent' };
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">${icon('cardlist')}</div><div style="font-weight:700;font-family:var(--font-display)">No applications yet</div><div style="color:var(--muted);font-size:13px">Once you apply or match, you'll see how each one is going here.</div></div>`;
+    return;
+  }
+  const q = S.q.trim().toLowerCase();
+  let items = entries.filter(e => !q || [e.company, e.role, e.status].join(' ').toLowerCase().includes(q));
+  const byDate = (a, b) => b.appliedAt - a.appliedAt;
+  if (S.sort === 'oldest') items.sort((a, b) => a.appliedAt - b.appliedAt);
+  else if (S.sort === 'company') items.sort((a, b) => String(a.company).localeCompare(String(b.company)));
+  else items.sort(byDate);
+  const rowClick = (e) => {
     if (e.jobId && JOBS.find(j => j.id === e.jobId)) return `closeCalendar(); openJobDetail('${e.jobId}')`;
     if (e.matchId) return `closeCalendar(); activeChatId='${e.matchId}'; goTo('chat'); renderChat();`;
     return `showToast('This job posting is no longer available')`;
   };
-  document.getElementById('calendar-overlay').innerHTML = `
-    <div class="detail-header"><button class="chat-back" onclick="backToMenu()">${icon('back')}</button><div class="detail-title">${icon('cardlist')} Diary</div></div>
-    <div class="list-scroll">
-      ${entries.length ? grouped.map(g => `
-        <div class="section-label">${g.status} <span style="opacity:.6">(${g.items.length})</span></div>
-        ${g.items.map(e => `
-          <div class="row" onclick="${diaryRowClick(e)}">
-            <div class="row-avatar">${initialAvatar(e.company)}</div>
-            <div class="row-text">
-              <div class="row-name">${e.role}</div>
-              <div class="row-sub">${e.company}</div>
-              ${e.status === 'Rejected' && e.reason ? `<div class="diary-reason">${icon('alert')} ${e.reason}</div>` : ''}
-              ${(e.status === 'Interview scheduled' || e.status === 'Final round') ? `<button class="title-action" style="margin-top:6px" onclick="event.stopPropagation(); closeCalendar(); ${e.jobId ? `openInterviewTips('${e.jobId}')` : `openAI()`}">${icon('sparkle')} Prepare for this interview</button>` : ''}
-            </div>
-          </div>`).join('')}
-      `).join('') : `<div class="empty-state"><div class="empty-icon">${icon('cardlist')}</div><div style="font-weight:700;font-family:var(--font-display)">No applications yet</div><div style="color:var(--muted);font-size:13px">Once you apply or match, you'll see how each one is going here.</div></div>`}
+  const rowHTML = (e) => `
+    <div class="row" onclick="${rowClick(e)}">
+      <div class="row-avatar">${initialAvatar(e.company)}</div>
+      <div class="row-text">
+        <div class="row-name">${esc(e.role)}</div>
+        <div class="row-sub">${esc(e.company)}${S.sort === 'status' ? '' : ` · ${esc(e.status)}`}</div>
+        <div class="diary-meta">${icon('clock')} Applied ${formatDiaryDate(e.appliedAt)}</div>
+        ${e.status === 'Rejected' && e.reason ? `<div class="diary-reason">${icon('alert')} ${e.reason}</div>` : ''}
+        ${(e.status === 'Interview scheduled' || e.status === 'Final round') ? `<button class="title-action" style="margin-top:6px" onclick="event.stopPropagation(); closeCalendar(); ${e.jobId ? `openInterviewTips('${e.jobId}')` : `openAI()`}">${icon('sparkle')} Prepare for this interview</button>` : ''}
+      </div>
     </div>`;
-  document.getElementById('calendar-overlay').classList.add('show');
+  const count = `<div class="diary-count">${items.length} of ${entries.length} application${entries.length === 1 ? '' : 's'}</div>`;
+  if (!items.length) { list.innerHTML = count + `<div class="diary-empty-search">No applications match “${esc(S.q)}”.</div>`; return; }
+  if (S.sort === 'status') {
+    const groups = APPLICATION_STATUSES.map(status => ({ status, items: items.filter(e => e.status === status) })).filter(g => g.items.length);
+    list.innerHTML = count + groups.map(g => `<div class="section-label">${g.status} <span style="opacity:.6">(${g.items.length})</span></div>${g.items.map(rowHTML).join('')}`).join('');
+  } else {
+    list.innerHTML = count + items.map(rowHTML).join('');
+  }
 }
 
 /* ============================== CHAT ============================== */
@@ -11109,6 +11174,237 @@ function enhanceApplicantsInformationArchitecture(){
 const __renderApplicantsIA=renderApplicants;
 renderApplicants=function(){__renderApplicantsIA();enhanceApplicantsInformationArchitecture()};
 </script>
+
+<style id="applicants-v3">
+#screen-list.ap3{padding:0 20px 120px!important;display:flex!important;flex-direction:column!important;gap:14px!important}
+#screen-list.ap3 *{box-sizing:border-box}
+#screen-list.ap3 > *{flex-shrink:0!important}
+.ap3-av{display:block;overflow:hidden}
+.ap3-av img,.ap3-av svg{width:100%!important;height:100%!important;object-fit:cover;display:block;border-radius:50%}
+.ap3-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:4px}
+.ap3-head h1{margin:0;font-size:34px;line-height:1.05;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.ap3-head p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.4}
+.ap3-tools{display:flex;gap:8px}
+.ap3-search{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:46px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--raised);color:var(--muted)}
+.ap3-search svg{width:18px;height:18px;flex:0 0 auto}
+.ap3-search input{flex:1;min-width:0;border:0!important;outline:0;background:transparent!important;font:inherit;font-size:15px;color:var(--ink);height:100%;padding:0!important;box-shadow:none!important}
+.ap3-search input::-webkit-search-cancel-button{display:none}
+.ap3-clear-q{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:4px}
+.ap3-filter-btn{position:relative;display:inline-flex;align-items:center;gap:7px;height:46px;padding:0 16px;border:1px solid var(--border);border-radius:14px;background:var(--raised);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ap3-filter-btn svg{width:17px;height:17px}
+.ap3-filter-btn.on{border-color:var(--ink)}
+.ap3-filter-btn .ap3-count{min-width:20px;height:20px;border-radius:999px;background:var(--brand);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.ap3-select-wrap{position:relative}
+.ap3-select-wrap label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.ap3-select{width:100%;height:46px;padding:0 40px 0 14px;border:1px solid var(--border);border-radius:14px;background:var(--raised);color:var(--ink);font:inherit;font-size:15px;font-weight:600;-webkit-appearance:none;appearance:none;cursor:pointer}
+.ap3-select-wrap:after{content:"";position:absolute;right:17px;bottom:19px;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);pointer-events:none}
+.ap3-panel{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px solid var(--border);border-radius:18px;background:var(--raised)}
+.ap3-panel[hidden]{display:none}
+.ap3-fgroup{display:flex;flex-direction:column;gap:8px}
+.ap3-fgroup > span{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ap3-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ap3-chip{height:34px;padding:0 13px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.ap3-chip.on{background:var(--ink);border-color:var(--ink);color:var(--raised)}
+.ap3-panel-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:4px;border-top:1px solid var(--border);padding-top:12px}
+.ap3-link{border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0}
+.ap3-apply{height:42px;padding:0 18px;border:0;border-radius:999px;background:var(--ink);color:var(--raised);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.ap3-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:2px 20px}
+.ap3-tabs::-webkit-scrollbar{display:none}
+.ap3-tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ap3-tab b{font-size:12px;color:var(--muted);font-weight:700}
+.ap3-tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--raised)}
+.ap3-tab[aria-selected="true"] b{color:var(--raised);opacity:.7}
+.ap3-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.ap3-bar b{color:var(--ink)}
+.ap3-sort{border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer;-webkit-appearance:none;appearance:none;padding:4px 16px 4px 4px;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 6px) 50%,calc(100% - 2px) 50%;background-size:4px 4px;background-repeat:no-repeat}
+.ap3-active{display:flex;flex-wrap:wrap;gap:6px}
+.ap3-active button{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:0;border-radius:999px;background:color-mix(in srgb,var(--brand) 12%,var(--raised));color:var(--ink);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.ap3-active button span{font-size:15px;line-height:1;color:var(--brand)}
+.ap3-list{display:flex;flex-direction:column;gap:10px;list-style:none;margin:0;padding:0}
+.ap3-card{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--border);border-radius:20px;background:var(--raised);color:var(--ink)}
+.ap3-top{display:flex;align-items:flex-start;gap:12px;cursor:pointer;border:0;background:transparent;padding:0;text-align:left;font:inherit;color:inherit;width:100%}
+.ap3-av{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--surface)}
+.ap3-id{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ap3-name{font-size:16px;font-weight:800;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap3-role{font-size:14px;color:var(--ink);opacity:.8;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ap3-loc{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);line-height:1.35;margin-top:2px}
+.ap3-loc svg{width:13px;height:13px;flex:0 0 auto}
+.ap3-score{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.ap3-score b{font-size:18px;font-weight:800;line-height:1}
+.ap3-score small{font-size:11px;color:var(--muted);font-weight:600}
+.ap3-score.hi b{color:var(--brand)}
+.ap3-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:0;padding:12px 0 0;border-top:1px solid var(--border)}
+.ap3-facts div{min-width:0}
+.ap3-facts dt{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0}
+.ap3-facts dd{margin:2px 0 0;font-size:14px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap3-skills{display:flex;flex-wrap:wrap;gap:6px}
+.ap3-skills span{height:28px;display:inline-flex;align-items:center;padding:0 10px;border-radius:999px;background:var(--surface);font-size:12px;font-weight:600;color:var(--ink)}
+.ap3-skills span.hit{background:color-mix(in srgb,var(--brand) 14%,var(--raised));color:var(--ink)}
+.ap3-status{align-self:flex-start;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700}
+.ap3-actions{display:flex;gap:8px}
+.ap3-btn{flex:1;min-width:0;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;padding:0 16px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.ap3-btn svg{width:16px;height:16px}
+.ap3-btn.primary{border-color:var(--ink)}
+.ap3-btn.primary svg{color:var(--brand)}
+.ap3-btn:disabled{opacity:.5;cursor:default}
+.ap3-empty{padding:28px 18px;border:1px dashed var(--border);border-radius:20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
+.ap3-empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+.ap3-more{height:44px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.ap3-jobtag{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.05em}
+</style>
+<script id="applicants-v3-js">
+(function(){
+  const S = window.ap3 = window.ap3 || {jobId:'all', tab:'applied', q:'', compat:'all', setup:'all', city:'all', salary:'all', sort:'match', open:false, limit:20};
+  const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const I = {
+    search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
+    filter: svg('<path d="M4 6h16M7 12h10M10 18h4"/>'),
+    pin: svg('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'),
+    user: svg('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+    heart: svg('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'),
+    send: svg('<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>'),
+    chat: svg('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>')
+  };
+  const parts = v => Array.isArray(v) ? v.filter(Boolean).map(String) : String(v||'').split(/\s*[·,]\s*/).filter(Boolean);
+  const setupOf = c => { const s = parts(c.work_setup).filter(x => /remote|hybrid|on-?site/i.test(x)).map(x => /remote/i.test(x)?'Remote':/hybrid/i.test(x)?'Hybrid':'On-site'); return [...new Set(s)]; };
+  const salaryK = c => { if (c.min_salary_amount) { const n = +c.min_salary_amount; return n > 1000 ? Math.round(n/1000) : n; } const m = String(c.salary||'').match(/(\d+(?:[.,]\d+)?)\s*k/i); return m ? Math.round(parseFloat(m[1].replace(',','.'))) : null; };
+  const salaryText = c => { const k = salaryK(c); return k ? `€${k}k min / year` : 'Not specified'; };
+  const locText = c => { const l = String(c.location||'').replace(/\uFFFD+/g,'·').trim(); return l || 'Location not specified'; };
+  const cityKey = c => { const l = locText(c); if (/^remote/i.test(l)) return 'Remote'; return l.split(',')[0].trim(); };
+  const yearsOf = c => { if (c.years_experience) return String(c.years_experience).replace(/\s*years?$/i,'') + ' yrs'; const t = (c.experience||[]).reduce((a,e) => a + (parseFloat((String(e.duration||'').match(/(\d+(?:\.\d+)?)\s*yrs?/)||[])[1])||0), 0); return t ? t + ' yrs' : '—'; };
+  const availOf = c => c.available_from || c.notice_period || 'Not specified';
+  const scoreFor = (c, job) => { try { return job ? computeCandidateMatchScore(c, job) : (c._score ?? computeCandidateMatchScore(c)); } catch(e) { return c.score || 0; } };
+  const jobs = () => RECRUITER_JOBS.filter(j => !j.archived);
+  const jobOf = c => { try { return guessJobIdForCandidate(c); } catch(e) { return null; } };
+  const candOfMatch = m => CANDIDATES.find(x => 'm-'+x.id === m.id || x.id === m.candidate_id || 'inv-'+x.id === m.id);
+
+  function buckets(){
+    const js = S.jobId === 'all' ? jobs() : jobs().filter(j => j.id === S.jobId);
+    const ids = new Set(js.map(j => j.id));
+    const jobById = id => RECRUITER_JOBS.find(j => j.id === id);
+    const matchedC = new Set(matchesData.map(m => candOfMatch(m)?.id).filter(Boolean));
+    const out = {applied:[], matches:[], invited:[], discover:[]};
+    CANDIDATES.forEach(c => {
+      if (matchedC.has(c.id)) return;
+      if (c.applied) { const jid = jobOf(c); if (ids.has(jid)) out.applied.push({c, job: jobById(jid)}); }
+    });
+    matchesData.forEach(m => {
+      if (!ids.has(m.job_id)) return;
+      const c = candOfMatch(m); if (!c) return;
+      (m.status === 'invited' ? out.invited : out.matches).push({c, m, job: jobById(m.job_id)});
+    });
+    const ref = js.length === 1 ? js[0] : null;
+    out.discover = CANDIDATES.filter(c => !c.applied && !matchedC.has(c.id)).map(c => ({c, job: ref}));
+    Object.values(out).forEach(arr => arr.forEach(x => x.score = scoreFor(x.c, x.job)));
+    return out;
+  }
+
+  function passes(x){
+    const c = x.c, q = S.q.trim().toLowerCase();
+    if (q) { const hay = [c.name, c.headline, c.primary_role, c.location, ...(c.skills||[]), ...(c.tools||[]), ...(c.languages||[]).map(String)].join(' ').toLowerCase(); if (!q.split(/\s+/).every(t => hay.includes(t))) return false; }
+    if (S.compat === '80' && x.score < 80) return false;
+    if (S.compat === '60' && (x.score < 60 || x.score >= 80)) return false;
+    if (S.compat === '0' && x.score >= 60) return false;
+    if (S.setup !== 'all' && !setupOf(c).includes(S.setup)) return false;
+    if (S.city !== 'all' && cityKey(c) !== S.city) return false;
+    if (S.salary !== 'all') { const k = salaryK(c); if (k == null) return false; const [lo, hi] = S.salary.split('-').map(Number); if (k < lo || (hi && k >= hi)) return false; }
+    return true;
+  }
+  const sorters = { match:(a,b) => b.score - a.score, salaryAsc:(a,b) => (salaryK(a.c)??1e9) - (salaryK(b.c)??1e9), salaryDesc:(a,b) => (salaryK(b.c)??-1) - (salaryK(a.c)??-1), name:(a,b) => a.c.name.localeCompare(b.c.name) };
+
+  const OPTS = {
+    compat:[['all','Any'],['80','80%+'],['60','60–79%'],['0','Below 60%']],
+    setup:[['all','Any'],['Remote','Remote'],['Hybrid','Hybrid'],['On-site','On-site']],
+    salary:[['all','Any'],['0-60','Under €60k'],['60-90','€60–90k'],['90-120','€90–120k'],['120-0','€120k+']]
+  };
+  const activeCount = () => ['compat','setup','city','salary'].filter(k => S[k] !== 'all').length;
+  const labelOf = (k, v) => k === 'city' ? v : (OPTS[k].find(o => o[0] === v)||[])[1];
+
+  function cardHTML(x){
+    const c = x.c, m = x.m, sk = (c.skills||[]).slice(0,4), need = new Set(((x.job&&x.job.skills)||[]).map(s => String(s).toLowerCase()));
+    const setup = setupOf(c).join(' / ') || 'Not specified';
+    const showJob = S.jobId === 'all' && x.job && S.tab !== 'discover';
+    let status = '';
+    if (m && typeof matchRowStatusInfo === 'function') { try { const si = matchRowStatusInfo(m); status = `<span class="ap3-status" style="background:${si.bg};color:${si.color}">${esc(si.shortLabel||si.label)}</span>`; } catch(e){} }
+    let actions;
+    if (S.tab === 'applied') actions = `<button type="button" class="ap3-btn" onclick="ap3Open('${c.id}')">${I.user}View profile</button><button type="button" class="ap3-btn primary" onclick="ap3Match('${c.id}')">${I.heart}Match</button>`;
+    else if (S.tab === 'discover') actions = `<button type="button" class="ap3-btn" onclick="ap3Open('${c.id}')">${I.user}View profile</button><button type="button" class="ap3-btn primary" onclick="ap3Invite('${c.id}')">${I.send}Invite</button>`;
+    else actions = `<button type="button" class="ap3-btn" onclick="openCandidateDetailByMatch('${m.id}')">${I.user}View profile</button><button type="button" class="ap3-btn primary" onclick="ap3Chat('${m.id}')">${I.chat}Message</button>`;
+    const open = m ? `openCandidateDetailByMatch('${m.id}')` : `ap3Open('${c.id}')`;
+    return `<li class="ap3-card">
+      ${showJob ? `<span class="ap3-jobtag">${esc(x.job.title)}</span>` : ''}
+      <button type="button" class="ap3-top" onclick="${open}" aria-label="Open ${esc(c.name)}'s profile">
+        <span class="ap3-av" aria-hidden="true">${avatarSVG(c.name, 52)}</span>
+        <span class="ap3-id"><span class="ap3-name">${esc(c.name)}</span><span class="ap3-role">${esc(c.headline || c.primary_role || 'Candidate')}</span><span class="ap3-loc">${I.pin}${esc(locText(c))}</span></span>
+        <span class="ap3-score ${x.score>=80?'hi':''}"><b>${x.score}%</b><small>match</small></span>
+      </button>
+      ${status}
+      <dl class="ap3-facts">
+        <div><dt>Expected salary</dt><dd>${esc(salaryText(c))}</dd></div>
+        <div><dt>Work setup</dt><dd>${esc(setup)}</dd></div>
+        <div><dt>Experience</dt><dd>${esc(yearsOf(c))}</dd></div>
+        <div><dt>Available</dt><dd>${esc(availOf(c))}</dd></div>
+      </dl>
+      ${sk.length ? `<div class="ap3-skills" aria-label="Top skills">${sk.map(s => `<span class="${need.has(String(s).toLowerCase())?'hit':''}">${esc(s)}</span>`).join('')}</div>` : ''}
+      <div class="ap3-actions">${actions}</div>
+    </li>`;
+  }
+
+  function chipGroup(key, title, opts){
+    return `<div class="ap3-fgroup" role="group" aria-label="${title}"><span>${title}</span><div class="ap3-chips">${opts.map(([v,l]) => `<button type="button" class="ap3-chip ${S[key]===v?'on':''}" aria-pressed="${S[key]===v}" onclick="ap3Set('${key}','${esc(v)}')">${esc(l)}</button>`).join('')}</div></div>`;
+  }
+
+  window.renderApplicants = function(){
+    const el = document.getElementById('screen-list'); if (!el) return;
+    if (window.applicantsFilter && applicantsFilter.jobId) { S.jobId = applicantsFilter.jobId; S.tab = applicantsFilter.kind === 'matches' ? 'matches' : 'applied'; applicantsFilter = null; S.limit = 20; }
+    if (S.jobId !== 'all' && !jobs().some(j => j.id === S.jobId)) S.jobId = 'all';
+    const b = buckets();
+    const pool = b[S.tab].concat();
+    const cities = [...new Set(pool.map(x => cityKey(x.c)))].sort((a,b2) => a === 'Remote' ? -1 : b2 === 'Remote' ? 1 : a.localeCompare(b2)).slice(0,12);
+    if (S.city !== 'all' && !cities.includes(S.city)) cities.unshift(S.city);
+    const list = pool.filter(passes).sort(sorters[S.sort] || sorters.match);
+    const shown = list.slice(0, S.limit);
+    const tabs = [['applied','Applied'],['matches','Matches'],['invited','Invited'],['discover','Not applied']];
+    const ac = activeCount();
+    const emptyCopy = {applied:['No applicants yet','When candidates apply to this job they will appear here, ranked by match.'],matches:['No matches yet','Match with an applicant to start a conversation.'],invited:['No invites sent','Invite strong profiles from the Not applied tab.'],discover:['No candidates found','Try a different search.']}[S.tab];
+    const filtersOn = ac || S.q.trim();
+    el.classList.add('ap3');
+    el.innerHTML = `
+      <header class="ap3-head"><div><h1>Applicants</h1><p>Review, compare and act on candidates for your jobs.</p></div></header>
+      <div class="ap3-tools">
+        <label class="ap3-search">${I.search}<span class="sr-only">Search candidates</span><input type="search" id="ap3-q" placeholder="Name, role, skill or city" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search">${S.q ? `<button type="button" class="ap3-clear-q" onclick="ap3Set('q','')" aria-label="Clear search">Clear</button>` : ''}</label>
+        <button type="button" class="ap3-filter-btn ${S.open?'on':''}" aria-expanded="${S.open}" aria-controls="ap3-panel" onclick="ap3Toggle()">${I.filter}Filters${ac ? `<span class="ap3-count">${ac}</span>` : ''}</button>
+      </div>
+      <div class="ap3-select-wrap"><label for="ap3-job">Job offer</label><select id="ap3-job" class="ap3-select" onchange="ap3Set('jobId',this.value)"><option value="all" ${S.jobId==='all'?'selected':''}>All job offers</option>${jobs().map(j => `<option value="${j.id}" ${S.jobId===j.id?'selected':''}>${esc(j.title)}${j.status!=='active'?' ('+esc(j.status)+')':''}</option>`).join('')}</select></div>
+      <div class="ap3-panel" id="ap3-panel" ${S.open?'':'hidden'}>
+        ${chipGroup('compat','Compatibility',OPTS.compat)}
+        ${chipGroup('setup','Work setup',OPTS.setup)}
+        ${chipGroup('city','Location',[['all','Any'], ...cities.map(c => [c,c])])}
+        ${chipGroup('salary','Expected salary',OPTS.salary)}
+        <div class="ap3-panel-foot"><button type="button" class="ap3-link" onclick="ap3Reset()">Clear all</button><button type="button" class="ap3-apply" onclick="ap3Toggle()">Show ${list.length} candidate${list.length===1?'':'s'}</button></div>
+      </div>
+      <div class="ap3-tabs" role="tablist" aria-label="Candidate stage">${tabs.map(([k,l]) => `<button type="button" role="tab" class="ap3-tab" aria-selected="${S.tab===k}" onclick="ap3Set('tab','${k}')">${l}<b>${b[k].length}</b></button>`).join('')}</div>
+      ${ac ? `<div class="ap3-active">${['compat','setup','city','salary'].filter(k => S[k] !== 'all').map(k => `<button type="button" onclick="ap3Set('${k}','all')" aria-label="Remove filter ${esc(labelOf(k,S[k]))}">${esc(labelOf(k,S[k]))}<span aria-hidden="true">×</span></button>`).join('')}</div>` : ''}
+      <div class="ap3-bar"><span><b>${list.length}</b> of ${pool.length} candidates</span><label><span class="sr-only">Sort by</span><select class="ap3-sort" onchange="ap3Set('sort',this.value)"><option value="match" ${S.sort==='match'?'selected':''}>Best match</option><option value="salaryAsc" ${S.sort==='salaryAsc'?'selected':''}>Salary: low to high</option><option value="salaryDesc" ${S.sort==='salaryDesc'?'selected':''}>Salary: high to low</option><option value="name" ${S.sort==='name'?'selected':''}>Name A–Z</option></select></label></div>
+      ${shown.length ? `<ul class="ap3-list">${shown.map(cardHTML).join('')}</ul>` : `<div class="ap3-empty"><b>${filtersOn ? 'No candidates match these filters' : emptyCopy[0]}</b>${filtersOn ? 'Try removing a filter or changing your search.' : emptyCopy[1]}${filtersOn ? `<div><button type="button" class="ap3-link" onclick="ap3Reset()">Clear filters</button></div>` : ''}</div>`}
+      ${list.length > shown.length ? `<button type="button" class="ap3-more" onclick="ap3More()">Show more (${list.length - shown.length} left)</button>` : ''}`;
+    const q = el.querySelector('#ap3-q');
+    let t;
+    q.addEventListener('input', e => { clearTimeout(t); const v = e.target.value; t = setTimeout(() => { S.q = v; S.limit = 20; renderApplicants(); const n = document.getElementById('ap3-q'); if (n) { n.focus(); n.setSelectionRange(v.length, v.length); } }, 220); });
+    q.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.nativeEvent?.isComposing && !e.isComposing && e.keyCode !== 229) { clearTimeout(t); S.q = q.value; renderApplicants(); document.getElementById('ap3-q')?.blur(); } });
+  };
+  window.ap3Set = (k, v) => { S[k] = v; if (k !== 'sort') S.limit = 20; if (k === 'jobId') S.city = 'all'; renderApplicants(); };
+  window.ap3Toggle = () => { S.open = !S.open; renderApplicants(); };
+  window.ap3Reset = () => { Object.assign(S, {q:'', compat:'all', setup:'all', city:'all', salary:'all', limit:20}); renderApplicants(); };
+  window.ap3More = () => { S.limit += 20; renderApplicants(); };
+  const byId = id => CANDIDATES.find(c => c.id === id);
+  window.ap3Open = id => openCandidateDetail(id);
+  window.ap3Match = id => { const c = byId(id); if (c) { openMatch(c); renderApplicants(); } };
+  window.ap3Invite = id => { const c = byId(id); if (c) { openInvite(c); } };
+  window.ap3Chat = mid => { if (typeof openChat === 'function') openChat(mid); else openCandidateDetailByMatch(mid); };
+})();
+</script>
 </body>
 </html>
 <style id="ux-quality-pass-oct02">
@@ -11582,8 +11878,601 @@ openPublishedJobSummary=function(jobId){
 <style id="role-select-background-hotfix">
 /* Restore the role-selection screen background. This intentionally overrides
    the later grey role-select rule without changing its menu/layout. */
-body #screen-role-select,
-body[data-theme="dark"] #screen-role-select {
-  background: #1b1714 !important;
-}
+body #screen-role-select { background: var(--surface-2) !important; }
+body[data-theme="dark"] #screen-role-select { background: var(--surface) !important; }
+body:has(#screen-role-select.active) .app-header { background: var(--surface-2) !important; }
+body[data-theme="dark"]:has(#screen-role-select.active) .app-header { background: var(--surface) !important; }
+/* Swipe cards on short phones (e.g. Samsung): body scrolls inside the card, actions stay pinned and visible. */
+#screen-swipe .card.card-photo > .nx-body { flex: 1 1 auto !important; min-height: 0 !important; overflow-y: auto !important; overscroll-behavior: contain; scrollbar-width: none; }
+#screen-swipe .card.card-photo > .nx-body::-webkit-scrollbar { display: none; }
+#screen-swipe .card.card-photo > .nx-photo { flex: 0 0 auto !important; }
+#screen-swipe .card.card-photo .nx-actions { position: sticky !important; bottom: 0 !important; z-index: 4 !important; margin-top: auto !important; padding-top: 10px !important; background: var(--raised) !important; box-shadow: 0 -10px 14px -6px var(--raised) !important; }
+/* Language flags: just the flag, no button chrome; tooltips never clipped at the banner edge. */
+.nx-lang-flag { -webkit-appearance: none !important; appearance: none !important; background: transparent !important; border: 0 !important; padding: 0 !important; box-shadow: none !important; outline-offset: 2px; color: inherit !important; -webkit-tap-highlight-color: transparent; }
+.nx-lang-flag > span[aria-hidden] { background: transparent !important; line-height: 1 !important; }
+.nx-banner .nx-photo-top { overflow: visible !important; }
+.nx-language-flags .nx-lang-tip { bottom: auto !important; top: 50% !important; left: calc(100% + 8px) !important; transform: translate(4px,-50%) !important; }
+.nx-language-flags .nx-lang-flag:hover .nx-lang-tip,
+.nx-language-flags .nx-lang-flag:focus .nx-lang-tip,
+.nx-language-flags .nx-lang-flag.tip-open .nx-lang-tip { transform: translate(0,-50%) !important; }
+.nx-language-flags .nx-lang-flag:hover, .nx-language-flags .nx-lang-flag.tip-open { z-index: 31 !important; }
+/* Account-creation section titles: symmetric padding so the marker centres on the text, same as the job-offer form. */
+.onb-step-label,
+#detail-overlay .profile-scroll .onb-step-label { padding-top: 8px !important; padding-bottom: 8px !important; line-height: 1.4 !important; }
 </style>
+
+<style id="oct04-unified-pass">
+/* ---------- Unified dropdown (matches job-wizard reference) ---------- */
+.u-sel{position:relative;width:100%}
+.u-sel-trigger{width:100%;height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px 0 16px;border:1px solid var(--border);border-radius:16px;background:var(--raised);color:var(--on-surface);font:inherit;font-size:15px;font-weight:500;text-align:left;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.u-sel-trigger span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-sel-trigger span.is-ph{color:var(--muted)}
+.u-sel-trigger svg{width:16px;height:16px;flex:0 0 auto;color:var(--muted);transition:transform .18s ease}
+.u-sel.open .u-sel-trigger{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.u-sel.open .u-sel-trigger svg{transform:rotate(180deg)}
+.u-sel-menu{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;max-height:280px;overflow-y:auto;background:var(--raised);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.14);padding:0;margin:0;list-style:none}
+.u-sel.open .u-sel-menu{display:block}
+.u-sel.up .u-sel-menu{top:auto;bottom:calc(100% + 6px)}
+.u-sel-opt{display:block;width:100%;padding:13px 16px;border:0;border-bottom:1px solid var(--border);background:transparent;color:var(--on-surface);font:inherit;font-size:15px;font-weight:500;text-align:left;cursor:pointer}
+.u-sel-opt:last-child{border-bottom:0}
+.u-sel-opt:hover{background:var(--surface-2)}
+.u-sel-opt[aria-selected="true"]{color:var(--brand);font-weight:700}
+.u-sel.compact .u-sel-trigger{height:36px;padding:0 10px 0 12px;border-radius:999px;font-size:13px;font-weight:600}
+.u-sel.compact .u-sel-menu{left:auto;right:0;min-width:210px}
+.u-sel.compact .u-sel-opt{font-size:14px;padding:12px 14px}
+
+/* Discover job dropdown: label starts at the left edge */
+#dj-select .dj-label{padding-left:0!important;margin-left:0!important;text-align:left!important;justify-content:flex-start!important}
+#dj-select .dj-trigger{justify-content:space-between!important}
+
+/* ---------- Unified emphasis: every bold run is ink + 700 ---------- */
+:where(p,li,label,small,.job-step-help,.field-helper,.onb-sub,.onb-field-label,.signup-sub,.tour-text,.screen-sub,.detail-body,.ap3-bar,.ap3-head) :where(b,strong){color:var(--on-surface);font-weight:700}
+.job-step-help b,.field-helper b,.onb-sub b,.onb-field-label b,.signup-sub b,.tour-text b,.ap3-bar b,.ap3-empty b,.nx-ai p b,.detail-body p b{color:var(--on-surface)!important;font-weight:700!important}
+
+/* ---------- Hiring process (step 9) ---------- */
+.hp-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.hp-row{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr) 32px;column-gap:8px;align-items:start;padding:12px 10px 12px 6px;border:1px solid var(--border);border-radius:18px;background:var(--raised);transition:box-shadow .15s ease}
+.hp-row.dragging{z-index:20;box-shadow:0 16px 34px rgba(0,0,0,.16);border-color:var(--brand);transition:none}
+.hp-row.shifting{transition:transform .16s ease}
+.hp-handle{width:24px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:transparent;padding:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.hp-handle i{display:block;width:14px;height:2px;border-radius:2px;background:var(--muted)}
+.hp-row.dragging .hp-handle{cursor:grabbing}
+.hp-main{min-width:0;display:flex;flex-direction:column;gap:8px}
+.hp-head{display:flex;align-items:center;gap:8px}
+.hp-num{flex:0 0 auto;width:24px;height:24px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--brand) 12%,var(--raised));color:var(--brand);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.hp-head .u-sel{flex:1;min-width:0}
+.hp-custom{width:100%;height:44px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);color:var(--on-surface);font:inherit;font-size:14px}
+.hp-custom:focus{outline:0;border-color:var(--brand);background:var(--raised)}
+.hp-meta{position:relative;display:flex;align-items:center;gap:8px;padding-left:32px}
+.hp-meta-label{font-size:12.5px;color:var(--muted)}
+.hp-time{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);color:var(--on-surface);font:inherit;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer}
+.hp-time svg{width:14px;height:14px;color:var(--brand)}
+.hp-time[aria-expanded="true"]{border-color:var(--brand);background:var(--raised)}
+.hp-pop{display:none;position:absolute;left:32px;top:36px;z-index:40;padding:10px;border:1px solid var(--border);border-radius:16px;background:var(--raised);box-shadow:0 16px 36px rgba(0,0,0,.16)}
+.hp-pop.open{display:block}
+.hp-wheels{display:flex;align-items:center;gap:6px}
+.hp-wheel-wrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+.hp-wheel-wrap small{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hp-wheel{position:relative;width:56px;height:96px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain;border-radius:12px;background:var(--surface-2);padding:32px 0}
+.hp-wheel::-webkit-scrollbar{display:none}
+.hp-wheel div{height:32px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:14px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.hp-wheel div.on{color:var(--on-surface);font-size:17px;font-weight:800}
+.hp-wheel-wrap:after{content:"";position:absolute;left:4px;right:4px;bottom:32px;height:32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);pointer-events:none}
+.hp-colon{font-size:18px;font-weight:800;color:var(--on-surface);padding-top:16px}
+.hp-done{display:block;width:100%;margin-top:8px;height:34px;border:0;border-radius:999px;background:var(--on-surface);color:var(--surface);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.hp-remove{width:32px;height:32px;margin-top:8px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:var(--muted);cursor:pointer}
+.hp-remove:hover{background:var(--surface-2);color:var(--on-surface)}
+.hp-remove svg{width:16px;height:16px}
+.hp-add{margin-top:12px;width:100%;height:46px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed var(--border);border-radius:16px;background:transparent;color:var(--on-surface);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.hp-add svg{width:16px;height:16px;color:var(--brand)}
+.hp-add:hover{border-color:var(--brand)}
+
+/* ---------- Applicants ---------- */
+.ap3-tabs{margin:0 -20px!important;padding:2px 20px 4px!important;scroll-padding:0 20px}
+.ap3-tabs:after{content:"";flex:0 0 12px}
+.ap3-tab{height:auto!important;padding:10px 14px!important;align-items:baseline!important;line-height:1!important}
+.ap3-tab b{line-height:1!important;font-variant-numeric:tabular-nums}
+.ap3-bar{align-items:center}
+.ap3-bar .u-sel{width:auto}
+.ap3-select-wrap:after{display:none!important}
+.ap3-select-wrap,.ap3-bar{position:relative;z-index:70}
+.u-sel.open{z-index:80}
+.ap3-select-wrap .u-sel-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em}
+
+/* ---------- Swipe-card language flags: one white pill, like the match pill ---------- */
+.nx-language-flags{display:inline-flex!important;align-items:center!important;gap:5px!important;width:auto!important;padding:4px 9px!important;border-radius:999px!important;background:var(--raised)!important;box-shadow:0 2px 10px rgba(0,0,0,.22)!important}
+.nx-language-flags{align-self:flex-start!important;max-width:max-content!important;right:auto!important;flex:0 0 auto!important}
+.js2-fact:last-child:nth-child(odd){grid-column:1/-1}
+.nx-language-flags:before{content:"Speaks";font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);margin-right:2px}
+.nx-language-flags .nx-lang-flag > span[aria-hidden]{font-size:15px!important}
+
+/* ---------- "Why X fits this role": expand in place, same look ---------- */
+.card.card-photo .nx-ai.ai-expanded,.nx-ai.ai-expanded{position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;z-index:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;background:color-mix(in srgb,var(--brand) 9%,transparent)!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
+.card.card-photo .nx-ai.ai-expanded p,.nx-ai.ai-expanded p{display:block!important;-webkit-line-clamp:unset!important;overflow:visible!important}
+.nx-ai.ai-expanded::after{content:"Tap to collapse"!important}
+
+/* ---------- Job summary ---------- */
+.js2{display:flex;flex-direction:column;gap:12px;padding-bottom:16px}
+.js2-hero{padding:20px;border:1px solid var(--border);border-radius:22px;background:var(--raised)}
+.js2-co{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.js2-logo{width:40px;height:40px;border-radius:12px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--on-surface);color:var(--surface);font-weight:800;font-size:16px;background-size:cover;background-position:center}
+.js2-co b{display:block;font-size:14px;font-weight:700;color:var(--on-surface)}
+.js2-co small{display:block;font-size:12.5px;color:var(--muted)}
+.js2-status{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--on-surface);text-transform:capitalize}
+.js2-status i{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.js2-status.active i{background:#1f9d55}
+.js2-title{margin:0;font-size:26px;line-height:1.1;font-weight:800;letter-spacing:-.02em;color:var(--on-surface);text-wrap:balance}
+.js2-sub{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13.5px;color:var(--muted)}
+.js2-sub span{display:inline-flex;align-items:center;gap:5px}
+.js2-sub svg{width:14px;height:14px}
+.js2-salary{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.js2-salary small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.js2-salary b{font-size:18px;font-weight:800;color:var(--brand);font-variant-numeric:tabular-nums;text-align:right}
+.js2-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:18px;background:var(--raised);overflow:hidden}
+.js2-stats button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px;border:0;border-right:1px solid var(--border);background:transparent;color:var(--on-surface);font:inherit;cursor:pointer}
+.js2-stats button:last-child{border-right:0}
+.js2-stats b{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.js2-stats small{font-size:12px;color:var(--muted)}
+.js2-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.js2-fact{padding:12px 14px;border:1px solid var(--border);border-radius:16px;background:var(--raised);min-width:0}
+.js2-fact small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.js2-fact b{display:block;font-size:14px;font-weight:700;line-height:1.35;color:var(--on-surface)}
+.js2-card{padding:18px;border:1px solid var(--border);border-radius:20px;background:var(--raised)}
+.js2-card h3{margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.js2-card p{margin:0;font-size:14.5px;line-height:1.6;color:var(--on-surface)}
+.js2-card h4{margin:14px 0 8px;font-size:13px;font-weight:700;color:var(--on-surface)}
+.js2-card h4:first-of-type{margin-top:0}
+.js2-checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.js2-checks li{display:flex;gap:10px;font-size:14.5px;line-height:1.5;color:var(--on-surface)}
+.js2-checks li:before{content:"";flex:0 0 auto;width:6px;height:6px;margin-top:8px;border-radius:50%;background:var(--brand)}
+.js2-chips{display:flex;flex-wrap:wrap;gap:6px}
+.js2-chips span{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;background:var(--surface-2);color:var(--on-surface)}
+.js2-chips.solid span{background:var(--on-surface);color:var(--surface)}
+.js2-chips.outline span{background:transparent;border:1px solid var(--border)}
+.js2-chips span em{font-style:normal;font-size:11.5px;font-weight:700;color:var(--brand)}
+.js2-rows{display:flex;flex-direction:column}
+.js2-rows div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+.js2-rows div:first-child{padding-top:0}
+.js2-rows div:last-child{border-bottom:0;padding-bottom:0}
+.js2-rows span{color:var(--muted)}
+.js2-rows b{font-weight:700;color:var(--on-surface);text-align:right}
+.js2-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.js2-steps li{position:relative;display:flex;gap:12px;padding-bottom:14px}
+.js2-steps li:last-child{padding-bottom:0}
+.js2-steps li:not(:last-child):after{content:"";position:absolute;left:12px;top:26px;bottom:2px;width:2px;background:var(--border)}
+.js2-steps .n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--brand) 12%,var(--raised));color:var(--brand);font-size:12px;font-weight:800}
+.js2-steps .t{display:flex;flex-direction:column;gap:2px;padding-top:3px}
+.js2-steps .t b{font-size:14.5px;font-weight:700;color:var(--on-surface)}
+.js2-steps .t small{font-size:12.5px;color:var(--muted)}
+.js2-sla{display:flex;align-items:center;gap:12px}
+.js2-sla b{font-size:28px;font-weight:800;color:var(--brand);line-height:1}
+.js2-sla p{font-size:13.5px!important;color:var(--muted)!important}
+.js2-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.js2-actions button{height:46px;border:1px solid var(--border);border-radius:999px;background:var(--raised);color:var(--on-surface);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.js2-actions button.primary{grid-column:1/-1;background:var(--on-surface);border-color:var(--on-surface);color:var(--surface)}
+</style>
+
+<script id="oct04-unified-pass-script">
+(function(){
+  const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const IC = {
+    chev: svg('<path d="m6 9 6 6 6-6"/>'),
+    clock: svg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3 2 6M22 6l-3-3"/>'),
+    x: svg('<path d="M18 6 6 18M6 6l12 12"/>'),
+    plus: svg('<path d="M12 5v14M5 12h14"/>'),
+    pin: svg('<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>'),
+    brief: svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'),
+    cal: svg('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>')
+  };
+
+  /* ---------- Unified dropdown ---------- */
+  const U = window.__uSel = window.__uSel || {};
+  window.uSelectHTML = function(id, options, value, onPick, opts){
+    opts = opts || {};
+    U[id] = onPick;
+    const cur = options.find(o => o.v === value);
+    return `<div class="u-sel ${opts.compact?'compact':''}" id="${id}">
+      <button type="button" class="u-sel-trigger" aria-haspopup="listbox" aria-expanded="false" ${opts.label?`aria-label="${esc(opts.label)}"`:''} onclick="uSelToggle(event,'${id}')"><span class="${cur?'':'is-ph'}">${esc(cur?cur.l:(opts.placeholder||'Select…'))}</span>${IC.chev}</button>
+      <ul class="u-sel-menu" role="listbox">${options.map((o,i)=>`<li><button type="button" role="option" class="u-sel-opt" aria-selected="${o.v===value}" onclick="uSelPick(event,'${id}',${i})">${esc(o.l)}</button></li>`).join('')}</ul>
+    </div>`;
+  };
+  window.__uSelOpts = window.__uSelOpts || {};
+  const origU = window.uSelectHTML;
+  window.uSelectHTML = function(id, options, value, onPick, opts){ window.__uSelOpts[id] = options; return origU(id, options, value, onPick, opts); };
+  window.uSelToggle = function(e, id){
+    e.stopPropagation();
+    const root = document.getElementById(id); if (!root) return;
+    const open = !root.classList.contains('open');
+    document.querySelectorAll('.u-sel.open').forEach(r => { r.classList.remove('open'); r.querySelector('.u-sel-trigger')?.setAttribute('aria-expanded','false'); });
+    if (!open) return;
+    const r = root.getBoundingClientRect();
+    root.classList.toggle('up', window.innerHeight - r.bottom < 240 && r.top > 300);
+    root.classList.add('open');
+    root.querySelector('.u-sel-trigger').setAttribute('aria-expanded','true');
+  };
+  window.uSelPick = function(e, id, i){
+    e.stopPropagation();
+    const root = document.getElementById(id); root?.classList.remove('open');
+    const o = (window.__uSelOpts[id]||[])[i]; const fn = U[id];
+    if (o && typeof fn === 'function') fn(o.v);
+  };
+  document.addEventListener('click', e => {
+    if (e.target.closest('.u-sel')) return;
+    document.querySelectorAll('.u-sel.open').forEach(r => { r.classList.remove('open'); r.querySelector('.u-sel-trigger')?.setAttribute('aria-expanded','false'); });
+  });
+
+  /* ---------- Hiring process ---------- */
+  const HP_PRESETS = ['Screening call','Interview with manager','Technical interview','Case study','Take-home assignment','Presentation','Team interview','Culture fit interview','Final interview','Reference check','Offer'];
+  const CUSTOM = '__custom';
+  const parseDur = d => { const s = String(d||''); const h = +((s.match(/(\d+)\s*h/i)||[])[1]||0); const m = +((s.match(/(\d+)\s*min/i)||[])[1]||0); return (h||m) ? {h, m} : {h:0, m:30}; };
+  const fmtDur = (h,m) => h && m ? `${h}h ${m} min` : h ? `${h}h` : `${m} min`;
+  const clock = (h,m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  const steps = () => { newJobData.hiring_process = newJobData.hiring_process || []; return newJobData.hiring_process; };
+  const norm = i => { const a = steps(); if (typeof a[i] !== 'object' || a[i] === null) a[i] = {text:String(a[i]||''), duration:'30 min'}; return a[i]; };
+
+  function rerender(){
+    const sc = document.querySelector('#detail-overlay .profile-scroll'); const top = sc ? sc.scrollTop : 0;
+    renderNewJobForm();
+    const sc2 = document.querySelector('#detail-overlay .profile-scroll'); if (sc2) sc2.scrollTop = top;
+  }
+
+  hiringStepRowHTML = function(s, i){
+    const st = typeof s === 'object' && s ? s : {text:String(s||''), duration:'30 min'};
+    const isCustom = st.custom || (st.text && !HP_PRESETS.includes(st.text));
+    const {h, m} = parseDur(st.duration);
+    const opts = [...HP_PRESETS.map(p => ({v:p, l:p})), {v:CUSTOM, l:'Custom step…'}];
+    return `<div class="hp-row" data-i="${i}">
+      <button type="button" class="hp-handle" aria-label="Drag to reorder step ${i+1}"><i></i><i></i><i></i></button>
+      <div class="hp-main">
+        <div class="hp-head"><span class="hp-num">${i+1}</span>${uSelectHTML('hp-sel-'+i, opts, isCustom ? CUSTOM : st.text, v => hpPick(i, v), {label:'Hiring step '+(i+1), placeholder:'Choose a step…'})}</div>
+        ${isCustom ? `<input class="hp-custom" style="margin-left:32px;width:calc(100% - 32px)" placeholder="Write your custom step…" value="${esc(st.text)}" oninput="hpText(${i},this.value)" aria-label="Custom step name">` : ''}
+        <div class="hp-meta"><span class="hp-meta-label">Duration</span>
+          <button type="button" class="hp-time" aria-expanded="false" aria-label="Duration ${esc(fmtDur(h,m))}" onclick="hpTimeToggle(event,${i})">${IC.clock}<span>${clock(h,m)}</span></button>
+          <div class="hp-pop" id="hp-pop-${i}" role="dialog" aria-label="Set duration">
+            <div class="hp-wheels">
+              <div class="hp-wheel-wrap"><small>Hours</small><div class="hp-wheel" data-kind="h" data-i="${i}">${Array.from({length:9},(_,k)=>`<div class="${k===h?'on':''}">${String(k).padStart(2,'0')}</div>`).join('')}</div></div>
+              <span class="hp-colon">:</span>
+              <div class="hp-wheel-wrap"><small>Min</small><div class="hp-wheel" data-kind="m" data-i="${i}">${Array.from({length:12},(_,k)=>`<div class="${k*5===m?'on':''}">${String(k*5).padStart(2,'0')}</div>`).join('')}</div></div>
+            </div>
+            <button type="button" class="hp-done" onclick="hpTimeClose()">Done</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="hp-remove" aria-label="Remove step ${i+1}" onclick="hpRemove(${i})">${IC.x}</button>
+    </div>`;
+  };
+
+  window.hpPick = (i, v) => { const st = norm(i); if (v === CUSTOM) { st.custom = true; if (HP_PRESETS.includes(st.text)) st.text = ''; } else { st.custom = false; st.text = v; } rerender(); if (v === CUSTOM) setTimeout(() => document.querySelector(`.hp-row[data-i="${i}"] .hp-custom`)?.focus(), 30); };
+  window.hpText = (i, v) => { const st = norm(i); st.custom = true; st.text = v; };
+  window.hpRemove = i => { steps().splice(i,1); rerender(); };
+  window.hpAdd = () => { steps().push({text:'', duration:'30 min'}); rerender(); const rows = document.querySelectorAll('.hp-row'); rows[rows.length-1]?.scrollIntoView({block:'center', behavior:'smooth'}); };
+
+  window.hpTimeClose = () => { document.querySelectorAll('.hp-pop.open').forEach(p => p.classList.remove('open')); document.querySelectorAll('.hp-time[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded','false')); };
+  window.hpTimeToggle = (e, i) => {
+    e.stopPropagation();
+    const pop = document.getElementById('hp-pop-'+i); const was = pop.classList.contains('open');
+    hpTimeClose(); if (was) return;
+    pop.classList.add('open'); e.currentTarget.setAttribute('aria-expanded','true');
+    const {h, m} = parseDur(norm(i).duration);
+    pop.querySelectorAll('.hp-wheel').forEach(w => { const idx = w.dataset.kind === 'h' ? h : Math.round(m/5); w.scrollTop = idx * 32; w.onscroll = () => { clearTimeout(w._t); w._t = setTimeout(() => wheelSettle(w), 90); }; });
+  };
+  function wheelSettle(w){
+    const idx = Math.max(0, Math.min(w.children.length-1, Math.round(w.scrollTop/32)));
+    [...w.children].forEach((c,k) => c.classList.toggle('on', k === idx));
+    const i = +w.dataset.i, st = norm(i), cur = parseDur(st.duration);
+    let h = cur.h, m = cur.m;
+    if (w.dataset.kind === 'h') h = idx; else m = idx*5;
+    if (!h && !m) m = 5;
+    st.duration = fmtDur(h,m);
+    const btn = document.querySelector(`.hp-row[data-i="${i}"] .hp-time`);
+    if (btn) { btn.querySelector('span').textContent = clock(h,m); btn.setAttribute('aria-label','Duration '+st.duration); }
+  }
+  document.addEventListener('click', e => { if (!e.target.closest('.hp-pop') && !e.target.closest('.hp-time')) hpTimeClose(); });
+  document.addEventListener('click', e => { const it = e.target.closest('.hp-wheel div'); if (!it) return; const w = it.parentElement; w.scrollTo({top:[...w.children].indexOf(it)*32, behavior:'smooth'}); });
+
+  /* Drag & drop: handle-only pointer drag, live shifting of siblings, auto-scroll. */
+  let D = null;
+  document.addEventListener('pointerdown', e => {
+    const handle = e.target.closest('.hp-handle'); if (!handle) return;
+    const row = handle.closest('.hp-row'); const list = row.parentElement;
+    const rows = [...list.querySelectorAll(':scope > .hp-row')];
+    const sc = row.closest('.profile-scroll') || document.scrollingElement;
+    hpTimeClose();
+    D = { row, rows, from: rows.indexOf(row), to: rows.indexOf(row), startY: e.clientY, startScroll: sc.scrollTop, sc,
+          mids: rows.map(r => { const b = r.getBoundingClientRect(); return b.top + b.height/2; }),
+          step: row.getBoundingClientRect().height + 10, lastY: e.clientY };
+    row.classList.add('dragging'); rows.forEach(r => r !== row && r.classList.add('shifting'));
+    try { handle.setPointerCapture(e.pointerId); } catch(_){}
+    e.preventDefault();
+  }, {passive:false});
+  function dragUpdate(){
+    if (!D) return;
+    const dy = D.lastY - D.startY + (D.sc.scrollTop - D.startScroll);
+    D.row.style.transform = `translateY(${dy}px)`;
+    const center = D.mids[D.from] + dy;
+    let to = D.from;
+    D.mids.forEach((mid, k) => { if (k > D.from && center > mid) to = k; if (k < D.from && center < mid && to >= D.from) to = k; });
+    if (to < D.from) { for (let k = 0; k < D.from; k++) if (center < D.mids[k]) { to = k; break; } }
+    D.to = to;
+    D.rows.forEach((r, k) => { if (r === D.row) return; let s = 0; if (D.from < to && k > D.from && k <= to) s = -D.step; if (to < D.from && k >= to && k < D.from) s = D.step; r.style.transform = s ? `translateY(${s}px)` : ''; });
+  }
+  document.addEventListener('pointermove', e => {
+    if (!D) return; D.lastY = e.clientY; dragUpdate();
+    const b = D.sc.getBoundingClientRect ? D.sc.getBoundingClientRect() : {top:0, bottom:innerHeight};
+    if (e.clientY < b.top + 60) D.sc.scrollTop -= 10; else if (e.clientY > b.bottom - 60) D.sc.scrollTop += 10;
+    e.preventDefault();
+  }, {passive:false});
+  function dragEnd(){
+    if (!D) return; const {from, to, rows} = D; D = null;
+    rows.forEach(r => { r.style.transform = ''; r.classList.remove('dragging','shifting'); });
+    if (from !== to) { const a = steps(); const [it] = a.splice(from,1); a.splice(to,0,it); rerender(); }
+  }
+  document.addEventListener('pointerup', dragEnd);
+  document.addEventListener('pointercancel', dragEnd);
+
+  /* Post-render: list wrapper + single "Add step" button instead of free-text input. */
+  const _rnjf = renderNewJobForm;
+  renderNewJobForm = function(){
+    const r = _rnjf.apply(this, arguments);
+    const input = document.getElementById('job-step-input');
+    if (input) {
+      const addRow = input.parentElement;
+      const first = document.querySelector('.hp-row'); 
+      const list = first ? first.parentElement : addRow.previousElementSibling;
+      if (list) list.classList.add('hp-list');
+      const help = addRow.parentElement.querySelector('.job-step-help');
+      if (help) help.innerHTML = 'Pick a <b>standard step</b> or choose <b>Custom step</b> to write your own. Drag the handle to reorder.';
+      addRow.outerHTML = `<button type="button" class="hp-add" onclick="hpAdd()">${IC.plus}Add step</button>`;
+    }
+    return r;
+  };
+
+  /* ---------- Applicants ---------- */
+  const S = window.ap3;
+  if (S) {
+    S.pageLimit = 10; S._lastQ = S.q;
+    const _ra = renderApplicants;
+    renderApplicants = window.renderApplicants = function(){
+      if (S.q !== S._lastQ) { S.pageLimit = 10; S._lastQ = S.q; }
+      S.limit = S.pageLimit;
+      _ra.apply(this, arguments);
+      const el = document.getElementById('screen-list'); if (!el) return;
+      const jobsList = RECRUITER_JOBS.filter(j => !j.archived);
+      const jw = el.querySelector('.ap3-select-wrap');
+      if (jw) jw.innerHTML = `<span class="u-sel-label">Job offer</span>${uSelectHTML('ap3-job-sel', [{v:'all', l:'All job offers'}, ...jobsList.map(j => ({v:j.id, l:j.title + (j.status !== 'active' ? ` (${j.status})` : '')}))], S.jobId, v => ap3Set('jobId', v), {label:'Job offer'})}`;
+      const sort = el.querySelector('.ap3-sort');
+      if (sort) sort.closest('label').outerHTML = uSelectHTML('ap3-sort-sel', [{v:'match',l:'Best match'},{v:'salaryAsc',l:'Salary: low to high'},{v:'salaryDesc',l:'Salary: high to low'},{v:'name',l:'Name A–Z'}], S.sort, v => ap3Set('sort', v), {compact:true, label:'Sort by'});
+      const tabs = el.querySelector('.ap3-tabs');
+      const mt = tabs && [...tabs.children].find(b => /ap3Set\('tab','matches'\)/.test(b.getAttribute('onclick')||''));
+      if (mt) tabs.prepend(mt);
+      const more = el.querySelector('.ap3-more');
+      if (more) { const left = (more.textContent.match(/\((\d+)/)||[])[1]; if (left) more.textContent = `Show ${Math.min(10, +left)} more · ${left} left`; }
+    };
+    window.ap3Set = (k, v) => { S[k] = v; if (k !== 'sort') S.pageLimit = 10; if (k === 'jobId') S.city = 'all'; renderApplicants(); };
+    window.ap3Reset = () => { Object.assign(S, {q:'', compat:'all', setup:'all', city:'all', salary:'all', pageLimit:10}); renderApplicants(); };
+    window.ap3More = () => { S.pageLimit += 10; renderApplicants(); };
+  }
+
+  /* ---------- Job summary ---------- */
+  openPublishedJobSummary = function(jobId){
+    const j = RECRUITER_JOBS.find(x => x.id === jobId); if (!j) return;
+    const C = (typeof COMPANY_PROFILE !== 'undefined' && COMPANY_PROFILE) || {};
+    const arr = v => Array.isArray(v) ? v.filter(x => x !== '' && x != null) : (v ? String(v).split(/\s*[·,]\s*/).filter(Boolean) : []);
+    const lbl = x => typeof x === 'object' ? (x.text || x.label || x.name || x.language || '') : String(x);
+    const has = v => Array.isArray(v) ? v.length : (v != null && String(v).trim() !== '');
+    const cur = ({EUR:'€', USD:'$', GBP:'£'})[j.currency || 'EUR'] || ((j.currency||'') + ' ');
+    const money = v => { const n = String(v).replace(/[^\d.]/g,''); if (!n) return esc(v); const k = +n >= 1000 ? Math.round(+n/1000) + 'k' : n; return cur + k; };
+    const salary = j.salary_exact ? money(j.salary_exact) : (j.salary_min || j.salary_max) ? `${j.salary_min ? money(j.salary_min) : ''}${j.salary_min && j.salary_max ? ' – ' : ''}${j.salary_max ? money(j.salary_max) : ''}` : '';
+    const period = j.salary_period ? ` / ${esc(j.salary_period)}` : ' / year';
+    const setup = arr(j.work_setup).map(lbl).join(' · ');
+    const loc = j.office_location || j.work_location || j.location || '';
+    let langs = arr(j.languages).map(x => typeof x === 'object' ? {n: x.language || x.name, l: x.level} : {n: x, l: ''});
+    if (j.language_levels && typeof j.language_levels === 'object') langs = langs.map(o => ({...o, l: o.l || j.language_levels[o.n] || ''}));
+    const steps = arr(j.hiring_process).map(x => typeof x === 'object' ? {t: x.text, d: x.duration} : {t: x, d: ''}).filter(s => s.t);
+    const vac = j.vacation_days ? `${esc(j.vacation_days)} ${esc(j.vacation_unit || 'days')}${j.vacation_type ? ' · ' + esc(j.vacation_type) : ''}` : '';
+    const sla = String(j.sla_days || C.sla_days || '').match(/\d+/)?.[0];
+    const fact = (k, v) => has(v) ? `<div class="js2-fact"><small>${k}</small><b>${esc(v)}</b></div>` : '';
+    const row = (k, v) => has(v) ? `<div><span>${k}</span><b>${v}</b></div>` : '';
+    const card = (t, body) => body ? `<section class="js2-card"><h3>${t}</h3>${body}</section>` : '';
+    const chips = (items, cls) => items.length ? `<div class="js2-chips ${cls||''}">${items.map(x => `<span>${esc(lbl(x))}</span>`).join('')}</div>` : '';
+    const skills = [...arr(j.skills), ...arr(j.tools)];
+    const nice = arr(j.nice_skills);
+    const resp = arr(j.responsibilities);
+    const benefits = arr(j.benefits);
+    const initials = String(C.name || 'Co').split(/\s+/).map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const logo = C.logo_url || C.logo;
+    const status = j.status || 'active';
+
+    const reqRows = [row('Experience', j.years_experience ? esc(j.years_experience) + ' years' : ''), row('Education', esc(j.education_level || '')), row('Field of study', esc(j.field_of_study_custom || j.field_of_study || '')), row('Visa / permits', esc(j.visa_note || ''))].join('');
+    const whereRows = [row('Work setup', esc(setup)), row('Office', esc(loc)), row('Time zone', esc(j.timezone_note || j.timezone || '')), row('Schedule', esc(j.schedule_note || ''))].join('');
+    const compRows = [row('Salary', salary ? salary + period : ''), row('Vacation', vac), row('Extra days', esc(j.extra_days || ''))].join('');
+
+    document.getElementById('detail-overlay').innerHTML = `
+      <div class="detail-header"><button class="chat-back" onclick="closeDetail()" aria-label="Back">${icon('back')}</button><div class="detail-title">Job summary</div></div>
+      <div class="detail-body"><div class="js2">
+        <header class="js2-hero">
+          <div class="js2-co"><span class="js2-logo" ${logo ? `style="background-image:url('${esc(logo)}')"` : ''} aria-hidden="true">${logo ? '' : esc(initials)}</span><div><b>${esc(C.name || 'Your company')}</b><small>${esc([C.industry, C.size].filter(Boolean).join(' · '))}</small></div><span class="js2-status ${status === 'active' ? 'active' : ''}"><i></i>${esc(status)}</span></div>
+          <h2 class="js2-title">${esc(j.title || 'Untitled role')}</h2>
+          <div class="js2-sub">${j.department ? `<span>${IC.brief}${esc(j.department)}</span>` : ''}${setup || loc ? `<span>${IC.pin}${esc([setup, loc].filter(Boolean).join(' · '))}</span>` : ''}${j.posted ? `<span>${IC.cal}Posted ${esc(j.posted)}</span>` : ''}</div>
+          ${salary ? `<div class="js2-salary"><small>Compensation</small><b>${salary}${period}</b></div>` : ''}
+        </header>
+        <div class="js2-stats" role="group" aria-label="Performance">
+          <button type="button" onclick="openJobAnalytics('${j.id}')"><b>${+j.views || 0}</b><small>Views</small></button>
+          <button type="button" onclick="closeDetail();openJobPeople('${j.id}','applicants')"><b>${+j.applicants || 0}</b><small>Applicants</small></button>
+          <button type="button" onclick="closeDetail();openJobPeople('${j.id}','matches')"><b>${+j.matches || 0}</b><small>Matches</small></button>
+        </div>
+        <div class="js2-facts">${fact('Contract', j.employment_type || j.contract_type)}${fact('Seniority', j.seniority)}${fact('Openings', j.openings)}${fact('Apply by', j.deadline)}</div>
+        ${card('About the role', j.summary ? `<p>${esc(j.summary)}</p>` : '')}
+        ${card('Responsibilities', resp.length ? `<ul class="js2-checks">${resp.map(r => `<li>${esc(lbl(r))}</li>`).join('')}</ul>` : '')}
+        ${card('Skills', skills.length || nice.length ? `${skills.length ? `<h4>Must have</h4>${chips(skills,'solid')}` : ''}${nice.length ? `<h4>Nice to have</h4>${chips(nice,'outline')}` : ''}` : '')}
+        ${card('Languages', langs.length ? `<div class="js2-chips">${langs.map(o => `<span>${esc(o.n)}${o.l ? ` <em>${esc(o.l)}</em>` : ''}</span>`).join('')}</div>` : '')}
+        ${card('Requirements', reqRows ? `<div class="js2-rows">${reqRows}</div>` : '')}
+        ${card('Where & when', whereRows ? `<div class="js2-rows">${whereRows}</div>` : '')}
+        ${card('Compensation & benefits', compRows || benefits.length ? `${compRows ? `<div class="js2-rows">${compRows}</div>` : ''}${benefits.length ? `<h4 style="margin-top:14px">Benefits</h4>${chips(benefits)}` : ''}` : '')}
+        ${card('Hiring process', steps.length ? `<ol class="js2-steps">${steps.map((s,i) => `<li><span class="n">${i+1}</span><span class="t"><b>${esc(s.t)}</b>${s.d ? `<small>${esc(s.d)}</small>` : ''}</span></li>`).join('')}</ol>` : '')}
+        ${card('Response commitment', sla ? `<div class="js2-sla"><b>${sla}d</b><p>Your team commits to replying to every match within ${sla} days.</p></div>` : '')}
+        ${card('About ' + esc(C.name || 'the company'), (C.industry || C.size || C.work_setup || arr(C.culture_values).length) ? `<div class="js2-rows">${row('Industry', esc(C.industry || ''))}${row('Size', esc(C.size || ''))}${row('Work model', esc(C.work_setup || ''))}${row('Website', esc(C.website || ''))}</div>${arr(C.culture_values).length ? `<h4 style="margin-top:14px">Culture</h4>${chips(arr(C.culture_values))}` : ''}` : '')}
+        <div class="js2-actions">
+          <button type="button" onclick="openJobEdit('${j.id}')">Edit job</button>
+          <button type="button" onclick="openJobAnalytics('${j.id}')">Analytics</button>
+          <button type="button" class="primary" onclick="closeDetail();openJobPeople('${j.id}','applicants')">Review applicants</button>
+        </div>
+      </div></div>`;
+    document.getElementById('detail-overlay').classList.add('show');
+  };
+})();
+</script>
+<style id="oct04-pass-3">
+/* Horizontal chip rows: drag / wheel scroll everywhere */
+.ap3-tabs,#screen-swipe .card .nx-tagline,#screen-swipe .card .nx-tagrow .nx-tags{cursor:grab}
+.hs-dragging{cursor:grabbing!important;scroll-behavior:auto!important;user-select:none}
+#screen-swipe .card .nx-tagline,#screen-swipe .card .nx-tagrow .nx-tags{flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;max-height:none!important;scrollbar-width:none;flex-shrink:0}
+#screen-swipe .card .nx-tagline::-webkit-scrollbar,#screen-swipe .card .nx-tagrow .nx-tags::-webkit-scrollbar{display:none}
+#screen-swipe .card .nx-tagline > *,#screen-swipe .card .nx-tagrow .nx-tags > *{flex:0 0 auto!important;white-space:nowrap!important}
+.hs-more{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
+
+/* Recruiter card: just the flag, clear of the photo */
+.nx-language-flags:before{content:none!important;display:none!important}
+.nx-banner .nx-language-flags{background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important;gap:8px!important;grid-column:2 / 4!important;grid-row:3!important;align-self:start!important;margin:8px 0 0!important}
+.nx-language-flags .nx-lang-flag > span[aria-hidden]{font-size:20px!important;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+
+/* Candidate job card: compact banner with title + company */
+#screen-swipe .card.card-photo > .nx-photo:not(.nx-banner){min-height:0!important;height:auto!important;flex:0 0 auto!important;padding:14px 16px 16px!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;gap:18px!important}
+#screen-swipe .card.card-photo > .nx-photo:not(.nx-banner) .nx-photo-copy{display:flex!important;visibility:visible!important;opacity:1!important;gap:4px!important;padding:0!important}
+#screen-swipe .card.card-photo > .nx-photo:not(.nx-banner) .nx-photo-copy b{font-size:22px!important;line-height:1.1!important;-webkit-line-clamp:2!important;display:-webkit-box!important;white-space:normal!important}
+#screen-swipe .card.card-photo > .nx-photo:not(.nx-banner) .nx-photo-copy small{font-size:13px!important;display:block!important}
+
+/* "The role" = same orange expandable box as "Why ... fits" */
+#screen-swipe .card .nx-about{display:block!important;flex:0 0 auto!important;cursor:pointer;margin-top:12px!important;padding:11px 14px!important;border:0!important;border-radius:16px!important;background:var(--brand-soft)!important}
+#screen-swipe .card .nx-about .nx-tags-label{display:block;margin:0 0 4px!important;color:var(--brand)!important;font-size:11px!important;font-weight:800!important;letter-spacing:.06em!important;text-transform:uppercase}
+#screen-swipe .card .nx-about p{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2!important;overflow:hidden!important;margin:0!important;font-size:13px!important;line-height:1.45!important;color:var(--on-surface)!important}
+#screen-swipe .card .nx-about::after{content:'Tap to expand';display:block;margin-top:6px;font-size:10px;font-weight:700;color:var(--brand)}
+#screen-swipe .card .nx-about.ai-expanded p{-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important}
+#screen-swipe .card .nx-about.ai-expanded::after{content:'Tap to collapse'}
+
+/* Job summary: chip contrast + stronger section titles */
+.js2-chips span{background:var(--surface)!important}
+.js2-chips.solid span{background:var(--on-surface)!important}
+.js2-chips.outline span{background:transparent!important}
+.js2-card h3{display:flex!important;align-items:center;gap:8px;color:var(--on-surface)!important;font-size:12.5px!important;margin-bottom:12px!important}
+.js2-card h3::before{content:'';flex:0 0 3px;height:14px;border-radius:2px;background:var(--brand)}
+#calendar-overlay.over-detail{z-index:96!important}
+
+/* Job detail: hiring process spacing + applied note */
+.detail-block-label + .process-list{margin-top:14px!important}
+.application-sla-note{display:flex!important;align-items:center!important;gap:12px!important}
+.application-sla-copy{display:flex!important;flex-wrap:wrap;align-items:center;gap:8px 10px;line-height:1.4}
+.application-sla-copy .sla-pill{margin:0!important;vertical-align:middle}
+#logo-mark{cursor:pointer}
+
+/* Settings extras */
+.settings-row.danger .settings-row-title{color:#D92D20}
+.settings-version{margin:22px 0 6px;text-align:center;font-size:12px;color:var(--muted)}
+.settings-page p{font-size:14px;line-height:1.6;color:var(--on-surface);margin:0 0 12px}
+
+/* Banner custom colour picker */
+.bn-swatch-custom{background:conic-gradient(red,#ff0,lime,cyan,blue,#f0f,red)!important}
+.bn-custom{display:none;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--border);border-radius:18px;background:var(--raised)}
+.bn-custom.open{display:flex}
+.bn-custom .bn-sv,.bn-custom .bn-hue{user-select:none;-webkit-user-select:none}
+.bn-sv{position:relative;height:150px;border-radius:12px;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,hsl(var(--hue),100%,50%));touch-action:none;cursor:crosshair}
+.bn-hue{position:relative;height:16px;border-radius:999px;background:linear-gradient(90deg,red,#ff0,lime,cyan,blue,#f0f,red);touch-action:none;cursor:pointer}
+.bn-knob{position:absolute;width:20px;height:20px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transform:translate(-50%,-50%);pointer-events:none}
+.bn-hue .bn-knob{top:50%}
+.bn-hex-row{display:flex;align-items:center;gap:10px}
+.bn-hex-dot{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);flex:0 0 auto}
+.bn-hex{flex:1;height:38px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font:inherit;font-size:14px;background:var(--raised);color:var(--on-surface);text-transform:uppercase}
+</style>
+<script id="oct04-pass-3-js">
+(function(){
+  const HS='.ap3-tabs, #screen-swipe .card .nx-tagline, #screen-swipe .card .nx-tagrow .nx-tags';
+  const scrollable=el=>el&&el.scrollWidth>el.clientWidth+2;
+  const markMore=el=>el.classList.toggle('hs-more',el.scrollLeft+el.clientWidth<el.scrollWidth-4);
+  let drag=null,suppress=false;
+  document.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='touch')return;
+    const row=e.target.closest&&e.target.closest(HS); if(!scrollable(row))return;
+    drag={row,x:e.clientX,left:row.scrollLeft,moved:false};
+    if(row.closest('#screen-swipe .card'))e.stopPropagation();
+  },true);
+  document.addEventListener('touchstart',e=>{const row=e.target.closest&&e.target.closest(HS);if(scrollable(row)&&row.closest('#screen-swipe .card'))e.stopPropagation();},{capture:true,passive:true});
+  window.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>4){drag.moved=true;drag.row.classList.add('hs-dragging');}if(drag.moved){drag.row.scrollLeft=drag.left-dx;markMore(drag.row);}});
+  window.addEventListener('pointerup',()=>{if(!drag)return;suppress=drag.moved;drag.row.classList.remove('hs-dragging');drag=null;setTimeout(()=>suppress=false,0);});
+  document.addEventListener('click',e=>{if(suppress){e.stopPropagation();e.preventDefault();suppress=false;}},true);
+  document.addEventListener('wheel',e=>{const row=e.target.closest&&e.target.closest(HS);if(!scrollable(row))return;const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;const max=row.scrollWidth-row.clientWidth;if((d>0&&row.scrollLeft<max-1)||(d<0&&row.scrollLeft>0)){row.scrollLeft+=d;markMore(row);e.preventDefault();}},{passive:false});
+  document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.matches&&t.matches(HS))markMore(t);},true);
+  const refreshMore=()=>document.querySelectorAll(HS).forEach(markMore);
+  new MutationObserver(()=>{clearTimeout(window._hsT);window._hsT=setTimeout(refreshMore,60);}).observe(document.body,{childList:true,subtree:true});
+
+  document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#screen-swipe .card .nx-about');if(!a)return;e.stopPropagation();a.classList.toggle('ai-expanded');},false);
+
+  if(typeof openJobAnalytics==='function'){const o=openJobAnalytics;window.openJobAnalytics=function(){const r=o.apply(this,arguments);const d=document.getElementById('detail-overlay');if(d&&d.classList.contains('show'))document.getElementById('calendar-overlay').classList.add('over-detail');return r;};}
+  if(typeof closeCalendar==='function'){const c=closeCalendar;window.closeCalendar=function(){const r=c.apply(this,arguments);document.getElementById('calendar-overlay').classList.remove('over-detail');return r;};}
+
+  window._editReturnJob=null;
+  const oe=window.openJobEdit;
+  window.openJobEdit=function(id){const t=document.querySelector('#detail-overlay.show .detail-title');window._editReturnJob=(t&&/job summary/i.test(t.textContent))?id:null;return oe.apply(this,arguments);};
+  const oc=window.closeDetail;
+  window.closeDetail=function(){const back=window._editReturnJob&&document.querySelector('#detail-overlay .job-form-step-caption')?window._editReturnJob:null;const r=oc.apply(this,arguments);if(back){window._editReturnJob=null;openPublishedJobSummary(back);}return r;};
+
+  const logo=document.getElementById('logo-mark');
+  if(logo)logo.addEventListener('click',()=>{const s=document.querySelector('.screen.active');if(!s||/login|signup|onboarding|role-select/.test(s.id))return;try{closeCalendar();}catch(_){}document.getElementById('detail-overlay')?.classList.contains('show')&&oc();goTo('swipe');if(typeof renderDeck==='function')renderDeck();});
+
+  const os=window.openSettings;
+  window.openSettings=function(){
+    const r=os.apply(this,arguments);
+    const b=document.querySelector('#calendar-overlay .detail-body'); if(!b)return r;
+    const seen=new Set();
+    b.querySelectorAll('.settings-row').forEach(row=>{const t=row.querySelector('.settings-row-title');if(!t)return;const k=t.textContent.trim();if(seen.has(k))row.remove();else seen.add(k);});
+    if(b.querySelector('[data-oct04]'))return r;
+    const chev=b.querySelector('.settings-account-card .settings-row svg');const ch=chev?chev.outerHTML:'';
+    const dark=getComputedStyle(document.body).getPropertyValue('--surface').trim().toLowerCase()!=='#ececec';
+    const nav=(title,sub,fn,cls='')=>`<div class="settings-row ${cls}" role="button" tabindex="0" onclick="${fn}"><div><div class="settings-row-title">${title}</div>${sub?`<div class="settings-row-sub">${sub}</div>`:''}</div>${ch}</div>`;
+    b.insertAdjacentHTML('beforeend',`<div data-oct04>
+      <div class="detail-block-label">Appearance</div>
+      <div class="settings-row"><div><div class="settings-row-title">Dark mode</div><div class="settings-row-sub">Easier on the eyes at night</div></div><div class="switch ${dark?'on':''}" role="switch" aria-checked="${dark}" onclick="event.stopPropagation();toggleTheme();openSettings()"><div class="switch-knob"></div></div></div>
+      <div class="detail-block-label">Help &amp; legal</div>
+      <div class="settings-account-card">
+        ${nav('Help center','Answers to common questions',"settingsPage('help')")}
+        ${nav('Contact support','support@mutch.app',"window.location.href='mailto:support@mutch.app'")}
+        ${nav('Terms of service','',"settingsPage('terms')")}
+        ${nav('Privacy policy','',"settingsPage('privacy')")}
+      </div>
+      <div class="settings-account-card" style="margin-top:18px">${nav('Log out','',"settingsLogout()",'danger')}</div>
+      <div class="settings-version">Mutch v1.0</div></div>`);
+    return r;
+  };
+  const PAGES={
+    help:['Help center',`<p><b>How does matching work?</b> Mutch compares your skills, experience, salary and location with each role and shows a match percentage.</p><p><b>How long do companies take to reply?</b> Every company commits to a response time, shown on each job card.</p><p><b>Can I hide my profile?</b> Yes. Turn off visibility in Settings or pause your account at any time.</p>`],
+    terms:['Terms of service',`<p>By using Mutch you agree to provide accurate information and to use the service respectfully. Companies agree to reply to candidates within their stated response time.</p><p>We may update these terms and will notify you of significant changes.</p>`],
+    privacy:['Privacy policy',`<p>We only share your profile with companies you apply to, or with companies that can discover you if you enable visibility.</p><p>You can download or delete your data at any time from Settings.</p>`]
+  };
+  window.settingsPage=function(k){const p=PAGES[k];const ov=document.getElementById('calendar-overlay');ov.innerHTML=`<div class="detail-header"><button class="chat-back" onclick="openSettings()" aria-label="Back">${icon('back')}</button><div class="detail-title">${p[0]}</div></div><div class="detail-body settings-page">${p[1]}</div>`;ov.classList.add('show');};
+  window.settingsLogout=function(){if(!confirm('Log out of Mutch?'))return;try{closeCalendar();}catch(_){}try{oc();}catch(_){}goTo('login');showToast&&showToast('You have been logged out');};
+
+  /* Banner: free colour picker */
+  const hsv2hex=(h,s,v)=>{const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1));};return '#'+[f(5),f(3),f(1)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('').toUpperCase();};
+  const hex2hsv=hex=>{const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return{h:20,s:.88,v:1};const n=parseInt(m[1],16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360;}return{h,s:mx?d/mx:0,v:mx};};
+  const obc=window.bannerColorFor;
+  window.bannerColorFor=function(c){if(c&&/^#[0-9a-f]{6}$/i.test(c.banner||''))return{id:c.banner,label:'Custom',bg:c.banner};return obc(c);};
+  window._bnOpen=false;
+  const obp=window.bannerPickerHTML;
+  window.bannerPickerHTML=function(d){
+    let html=obp(d);const isCustom=/^#/.test(d.banner||'');const cur=isCustom?d.banner:bannerColorFor({banner:d.banner||'orange'}).bg;const st=window._bnHSV=hex2hsv(cur);
+    html=html.replace(/(<div class="bn-swatches"[^>]*>)([\s\S]*?)(<\/div>)/,(m,a,b,c)=>a+b+`<button type="button" class="bn-swatch bn-swatch-custom" role="radio" aria-checked="${isCustom}" aria-label="Custom colour" title="Custom colour" onclick="bnToggleCustom()"></button>`+c);
+    const panel=`<div class="bn-custom ${window._bnOpen?'open':''}"><div class="bn-sv" data-bn="sv" style="--hue:${st.h}"><span class="bn-knob bn-sv-knob" style="left:${st.s*100}%;top:${(1-st.v)*100}%;background:${cur}"></span></div><div class="bn-hue" data-bn="hue"><span class="bn-knob bn-hue-knob" style="left:${st.h/3.6}%;background:hsl(${st.h},100%,50%)"></span></div><div class="bn-hex-row"><span class="bn-hex-dot" style="background:${cur}"></span><input class="bn-hex" aria-label="Hex colour" value="${cur}" maxlength="7" onchange="bnHex(this.value)"></div></div>`;
+    return html.replace(/<\/div>\s*$/,panel+'</div>');
+  };
+  window.bnToggleCustom=function(){window._bnOpen=!window._bnOpen;if(window._bnOpen&&!/^#/.test(onboardData.banner||''))onboardData.banner=bannerColorFor({banner:onboardData.banner||'orange'}).bg;renderOnboarding();};
+  function bnApply(){const s=window._bnHSV,hex=hsv2hex(s.h,s.s,s.v);onboardData.banner=hex;const p=document.querySelector('.bn-picker');if(!p)return;p.querySelector('.nx-banner')?.style.setProperty('--bn',hex);const sv=p.querySelector('.bn-sv');sv.style.setProperty('--hue',s.h);const k=p.querySelector('.bn-sv-knob');k.style.left=s.s*100+'%';k.style.top=(1-s.v)*100+'%';k.style.background=hex;const hk=p.querySelector('.bn-hue-knob');hk.style.left=s.h/3.6+'%';hk.style.background=`hsl(${s.h},100%,50%)`;p.querySelector('.bn-hex-dot').style.background=hex;p.querySelector('.bn-hex').value=hex;p.querySelectorAll('.bn-swatch').forEach(b=>b.setAttribute('aria-checked',String(b.classList.contains('bn-swatch-custom'))));}
+  window.bnHex=function(v){v=v.trim();if(!v.startsWith('#'))v='#'+v;if(!/^#[0-9a-f]{6}$/i.test(v)){showToast&&showToast('Use a hex colour like #FF5A1F');return;}window._bnHSV=hex2hsv(v);bnApply();};
+  let bd=null;
+  const bnAt=(e)=>{const r=bd.el.getBoundingClientRect(),x=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y=Math.min(1,Math.max(0,(e.clientY-r.top)/r.height));if(bd.type==='hue')window._bnHSV.h=x*360;else{window._bnHSV.s=x;window._bnHSV.v=1-y;}bnApply();};
+  document.addEventListener('pointerdown',e=>{const el=e.target.closest&&e.target.closest('[data-bn]');if(!el)return;bd={el,type:el.dataset.bn};try{el.setPointerCapture(e.pointerId);}catch(_){}bnAt(e);e.preventDefault();});
+  document.addEventListener('pointermove',e=>{if(bd){bnAt(e);e.preventDefault();}},{passive:false});
+  document.addEventListener('pointerup',()=>{bd=null;});
+  document.addEventListener('selectstart',e=>{if(bd)e.preventDefault();});
+  const opk=window.pickBanner;window.pickBanner=function(id){window._bnOpen=false;return opk.apply(this,arguments);};
+})();
+</script>
