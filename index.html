@@ -10924,6 +10924,125 @@ function recruiterCancelCalendarInterview(i){const e=calendarEvents.recruiter[i]
 function confirmCalendarInterviewCancel(i){const reason=(document.getElementById('calendar-cancel-reason')?.value||'').trim();if(!reason){showToast('Add a reason');return}const e=calendarEvents.recruiter[i];if(e?.interview){e.interview.status='Cancelled';e.interview.cancelReason=reason}calendarEvents.recruiter.splice(i,1);closeDetail();showToast('Interview cancelled')}
 </script>
 
+
+
+<style id="oct04-last-three-fixes">
+/* Candidate cards: chips must never be vertically clipped. */
+.card.card-photo .nx-tagline,.nx-tagline{max-height:none!important;overflow:visible!important;display:flex!important;flex-wrap:wrap!important;gap:7px!important;padding-top:12px!important}
+.nx-tagline .nx-tag{min-height:30px!important;height:auto!important;line-height:18px!important;padding:6px 12px!important;display:inline-flex!important;align-items:center!important;box-sizing:border-box!important;overflow:visible!important}
+
+/* Candidate banner composition from the supplied reference. */
+.nx-banner .nx-photo-top{position:relative!important;display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:auto auto 1fr!important;column-gap:14px!important;row-gap:2px!important;align-items:start!important;height:100%!important}
+.nx-banner .nx-avatar-column{display:contents!important}
+.nx-banner .nx-avatar{grid-column:1!important;grid-row:1 / span 2!important}
+.nx-banner .nx-banner-name{grid-column:2!important;grid-row:1!important;margin:7px 0 0!important;align-self:start!important;color:#fff!important;font-size:24px!important;line-height:1.05!important;font-weight:800!important;max-width:100%!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.nx-banner .nx-bn-side{display:contents!important}
+.nx-banner .nx-match{grid-column:3!important;grid-row:1!important;justify-self:end!important;align-self:start!important}
+.nx-banner .nx-banner-sub{grid-column:2 / 4!important;grid-row:2!important;margin:3px 0 0!important;color:rgba(255,255,255,.95)!important;text-align:left!important;font-size:14px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+.nx-banner .nx-photo-chip{grid-column:3!important;grid-row:2!important;justify-self:end!important}
+.nx-language-flags{grid-column:1 / 4!important;grid-row:3!important;align-self:end!important;display:flex!important;gap:11px!important;align-items:center!important;padding:8px 0 1px!important;overflow:visible!important}
+.nx-lang-flag{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;width:31px!important;height:22px!important;border-radius:3px!important;font-size:25px!important;line-height:1!important;cursor:default!important;filter:saturate(1.05)}
+.nx-lang-tip{position:absolute!important;left:50%!important;bottom:calc(100% + 9px)!important;transform:translateX(-50%) translateY(4px)!important;background:#f6c7bd!important;color:#111!important;border-radius:999px!important;padding:7px 12px!important;font-size:11px!important;font-weight:750!important;line-height:1!important;white-space:nowrap!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:.15s ease!important;z-index:30!important;box-shadow:0 5px 18px rgba(0,0,0,.12)!important}
+.nx-lang-flag:hover .nx-lang-tip,.nx-lang-flag:focus .nx-lang-tip,.nx-lang-flag.tip-open .nx-lang-tip{opacity:1!important;visibility:visible!important;transform:translateX(-50%) translateY(0)!important}
+/* Language text was deliberately moved into the banner flags. */
+.nx-candidate-experience{display:flex!important;align-items:center!important;gap:7px!important;padding-top:12px!important;color:var(--muted)!important;font-size:13px!important}
+.nx-candidate-experience svg{width:16px!important;height:16px!important}
+
+/* Applicants job disclosure: one conventional chevron, no glyph mashups. */
+#screen-list .job-group-toggle{font-size:0!important;position:relative!important}
+#screen-list .job-group-toggle:after{content:""!important;width:9px!important;height:9px!important;border:0!important;border-right:2px solid currentColor!important;border-bottom:2px solid currentColor!important;transform:rotate(45deg)!important;transform-origin:center!important;margin-top:-4px!important}
+#screen-list .job-group:not(.collapsed) .job-group-toggle:after{transform:rotate(225deg)!important;margin-top:5px!important}
+</style>
+<script id="oct04-last-three-fixes-js">
+(function(){
+  const FLAG={english:'🇬🇧',french:'🇫🇷',spanish:'🇪🇸',german:'🇩🇪',italian:'🇮🇹',portuguese:'🇵🇹',dutch:'🇳🇱',polish:'🇵🇱',arabic:'🇸🇦',chinese:'🇨🇳',mandarin:'🇨🇳',japanese:'🇯🇵',korean:'🇰🇷',hindi:'🇮🇳',turkish:'🇹🇷',russian:'🇷🇺'};
+  function langParts(v){
+    const raw=typeof v==='object'&&v ? [v.language||v.name||v.label||v.value||'',v.level||v.proficiency||''].filter(Boolean).join(' ') : String(v||'');
+    const m=raw.trim().match(/^([^()]+?)\s*(?:\(([^)]+)\))?$/);
+    return {name:(m?m[1]:raw).trim(),level:(m&&m[2]?m[2]:'').trim(),raw:raw.trim()};
+  }
+  window.candidateLanguageFlagsHTML=function(c){
+    const langs=Array.isArray(c.languages)?c.languages:[];
+    if(!langs.length)return '';
+    return `<div class="nx-language-flags" aria-label="Languages">${langs.map((v,i)=>{const x=langParts(v),flag=FLAG[x.name.toLowerCase()]||'🌐',label=x.level?`${x.name} (${x.level})`:x.name;return `<button type="button" class="nx-lang-flag" aria-label="${label.replace(/"/g,'&quot;')}" onclick="event.stopPropagation();this.classList.toggle('tip-open')" onblur="this.classList.remove('tip-open')"><span aria-hidden="true">${flag}</span><span class="nx-lang-tip">${label}</span></button>`}).join('')}</div>`;
+  };
+  const oldBanner=window.candidateBannerHTML;
+  window.candidateBannerHTML=function(c,opt={}){
+    let html=oldBanner(c,opt);
+    const flags=window.candidateLanguageFlagsHTML(c);
+    if(flags) html=html.replace(/(<\/div>\s*<\/div>\s*<\/div>\s*)$/,flags+'$1');
+    return html;
+  };
+  const oldCard=window.candidateCardHTML;
+  window.candidateCardHTML=function(c){
+    let html=oldCard(c);
+    /* Remove the old language line; retain only experience in the freed space. */
+    html=html.replace(/<div class="nx-inline">[\s\S]*?<\/div>\s*(?=<div class="nx-tagline">|<div class="nx-ai">)/, candidateYears(c)?`<div class="nx-candidate-experience">${icon('briefcase')}<span>${candidateYears(c)} ${Number(candidateYears(c))===1?'yr':'yrs'} experience</span></div>`:'');
+    return html;
+  };
+})();
+</script>
+
+<style id="oct04-applicants-ia-upgrade">
+/* Applicants IA: no decorative orange rails here; hierarchy comes from tabs, counts and state. */
+#screen-list .job-group .section-label,#screen-list .job-group .job-group-title{border-left:0!important;padding-left:0!important}
+#screen-list .job-group{margin:10px 20px 18px!important;padding:0!important;border:1px solid var(--border)!important;border-radius:20px!important;background:var(--surface)!important;overflow:hidden!important}
+#screen-list .job-group-title{margin:0!important;padding:16px 16px 12px!important;color:var(--highlight)!important;font-size:16px!important;line-height:1.2!important;display:flex!important;align-items:center!important}
+#screen-list .job-group-body{padding:0 14px 14px!important}
+.applicant-stage-nav{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.applicant-stage-nav::-webkit-scrollbar{display:none}
+.applicant-stage-tab{flex:0 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;min-height:36px;padding:7px 11px;font:750 11.5px var(--font-body);white-space:nowrap}.applicant-stage-tab b{font-weight:850;color:inherit}.applicant-stage-tab.active{background:var(--on-surface);border-color:var(--on-surface);color:var(--surface)}
+.applicant-stage-panel{display:none}.applicant-stage-panel.active{display:block}.applicant-stage-panel>.section-label{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:3px 0 10px!important;padding:0!important;border:0!important;color:var(--muted)!important;font-size:10.5px!important;letter-spacing:.05em!important}
+.applicant-stage-empty{padding:20px 6px 18px;color:var(--muted);font-size:12.5px;line-height:1.45}
+.applicant-stage-help{font-size:11.5px;color:var(--muted);margin:-3px 0 12px;line-height:1.4}
+.applicant-not-applied-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--divider)}.applicant-not-applied-row:first-of-type{border-top:0}.applicant-not-applied-row .row-avatar{width:48px;height:48px}.applicant-not-applied-row .row-name{font-size:13.5px;font-weight:800}.applicant-not-applied-row .row-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.applicant-not-applied-actions{display:flex;align-items:center;gap:7px}.applicant-score-mini{font-size:12px;font-weight:850;color:var(--highlight)}.applicant-invite-mini{border:1px solid var(--border);background:var(--surface);border-radius:11px;min-height:34px;padding:6px 10px;font:750 11px var(--font-body);color:var(--on-surface)}
+.applicant-active-filters{display:flex;gap:6px;overflow-x:auto;margin:0 20px 10px;scrollbar-width:none}.applicant-active-filter{flex:0 0 auto;background:var(--surface-2,#f3f3f3);border:1px solid var(--border);border-radius:999px;padding:6px 9px;font-size:10.5px;color:var(--on-surface)}
+.applicant-job-summary{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 12px}.applicant-job-summary span{font-size:10.5px;color:var(--muted)}.applicant-job-summary b{color:var(--on-surface)}
+@media(max-width:520px){.app-filter-grid{grid-template-columns:1fr!important}.applicant-stage-tab{min-height:38px}.applicant-not-applied-row{grid-template-columns:44px minmax(0,1fr);}.applicant-not-applied-actions{grid-column:2;justify-content:flex-start}.applicant-not-applied-row .row-avatar{width:44px;height:44px}}
+</style>
+<script id="oct04-applicants-ia-upgrade-js">
+window.applicantStageByJob=window.applicantStageByJob||{};
+function _appJobForGroup(g,index){
+ if(applicantsFilter&&applicantsFilter.jobId)return RECRUITER_JOBS.find(j=>j.id===applicantsFilter.jobId);
+ const title=(g.querySelector('.job-group-title')?.childNodes[0]?.textContent||g.querySelector('.job-group-title')?.textContent||'').trim();
+ return RECRUITER_JOBS.filter(j=>!j.archived).find(j=>j.title.trim()===title)||RECRUITER_JOBS.filter(j=>!j.archived)[index];
+}
+function _appStageKey(label){const t=(label||'').toLowerCase();if(t.startsWith('matches'))return'matches';if(t.includes('applied'))return'applied';if(t.startsWith('invited'))return'invited';return''}
+function _appStageLabel(k){return k==='matches'?'Matches':k==='applied'?'Applied':k==='invited'?'Invited':'Not applied'}
+function setApplicantStage(jobId,key){window.applicantStageByJob[jobId]=key;const g=document.querySelector(`#screen-list .job-group[data-app-job="${jobId}"]`);if(!g)return;g.querySelectorAll('.applicant-stage-tab').forEach(b=>b.classList.toggle('active',b.dataset.stage===key));g.querySelectorAll('.applicant-stage-panel').forEach(p=>p.classList.toggle('active',p.dataset.stage===key));}
+function _appNotAppliedHTML(job){
+ const matchedCandidateIds=new Set(matchesData.filter(m=>m.job_id===job.id).map(m=>String(m.id).replace(/^m-/,'')));
+ const pool=CANDIDATES.filter(c=>!c.applied&&!matchedCandidateIds.has(String(c.id))).map(c=>({c,score:computeCandidateMatchScore(c,job)})).sort((a,b)=>b.score-a.score);
+ const shown=pool.slice(0,8);
+ if(!shown.length)return {count:0,html:'<div class="applicant-stage-empty">No discoverable candidates outside the application flow for this job.</div>'};
+ return {count:pool.length,html:`<div class="applicant-stage-help">Discoverable talent who has not applied to this job. Showing the strongest potential fits first.</div>${shown.map(({c,score})=>`<div class="applicant-not-applied-row" onclick="openCandidateDetail('${c.id}')"><div class="row-avatar" style="overflow:hidden">${avatarSVG(c.name,48)}</div><div><div class="row-name">${c.name}</div><div class="row-sub">${c.headline||''}</div></div><div class="applicant-not-applied-actions"><span class="applicant-score-mini">${score}%</span><button class="applicant-invite-mini" onclick="event.stopPropagation();openInvite(${JSON.stringify(c).replace(/"/g,'&quot;')})">Invite</button></div></div>`).join('')}`};
+}
+function enhanceApplicantsInformationArchitecture(){
+ const el=document.getElementById('screen-list');if(!el)return;
+ // Active filter summary makes the current result set obvious at a glance.
+ el.querySelector('.applicant-active-filters')?.remove();
+ const active=Object.entries(window.applicantFilters||{}).filter(([k,v])=>v&&v!=='All').map(([k,v])=>v);
+ if(active.length){const anchor=el.querySelector('.applicant-job-v2');anchor?.insertAdjacentHTML('afterend',`<div class="applicant-active-filters">${active.map(v=>`<span class="applicant-active-filter">${v}</span>`).join('')}</div>`)}
+ el.querySelectorAll('.job-group').forEach((g,index)=>{
+   const job=_appJobForGroup(g,index);if(!job)return;g.dataset.appJob=job.id;
+   const body=g.querySelector('.job-group-body')||g;
+   if(body.querySelector('.applicant-stage-nav'))return;
+   const labels=[...body.querySelectorAll(':scope > .section-label')];
+   const panels={};
+   labels.forEach(label=>{const key=_appStageKey(label.textContent);if(!key)return;const panel=document.createElement('div');panel.className='applicant-stage-panel';panel.dataset.stage=key;label.parentNode.insertBefore(panel,label);panel.appendChild(label);let n=panel.nextSibling;while(n&&!(n.nodeType===1&&n.classList.contains('section-label'))){const next=n.nextSibling;panel.appendChild(n);n=next}panels[key]=panel;});
+   const na=_appNotAppliedHTML(job);const nap=document.createElement('div');nap.className='applicant-stage-panel';nap.dataset.stage='notapplied';nap.innerHTML=na.html;body.appendChild(nap);panels.notapplied=nap;
+   const counts={};Object.entries(panels).forEach(([k,p])=>counts[k]=k==='notapplied'?na.count:p.querySelectorAll('.match-row-modern,.applied-clean-row,.row').length);
+   const order=['applied','matches','invited','notapplied'];let current=window.applicantStageByJob[job.id];if(!current||!panels[current])current=(panels.matches&&counts.matches?'matches':panels.applied&&counts.applied?'applied':panels.invited&&counts.invited?'invited':'notapplied');window.applicantStageByJob[job.id]=current;
+   const nav=document.createElement('div');nav.className='applicant-stage-nav';nav.innerHTML=order.filter(k=>panels[k]).map(k=>`<button class="applicant-stage-tab ${k===current?'active':''}" data-stage="${k}" onclick="setApplicantStage('${job.id}','${k}')">${_appStageLabel(k)} <b>${counts[k]||0}</b></button>`).join('');body.insertBefore(nav,body.firstChild);
+   Object.entries(panels).forEach(([k,p])=>p.classList.toggle('active',k===current));
+   const title=g.querySelector('.job-group-title');if(title){const summary=document.createElement('div');summary.className='applicant-job-summary';summary.innerHTML=`<span><b>${counts.applied||0}</b> applied</span><span>·</span><span><b>${counts.matches||0}</b> matches</span><span>·</span><span><b>${counts.invited||0}</b> invited</span>`;title.insertAdjacentElement('afterend',summary)}
+ });
+ // The old global “haven't applied yet” block is redundant now that every job has a direct Not applied category.
+ const scroll=el.querySelector('.list-scroll');if(scroll){const kids=[...scroll.children];for(let i=0;i<kids.length;i++){const n=kids[i];if(n.classList?.contains('section-label')&&/haven|discoverable talent/i.test(n.textContent)){n.remove();for(let x=i+1;x<kids.length;x++){const r=kids[x];if(r?.classList?.contains('job-group')||r?.classList?.contains('section-label'))break;if(r?.classList?.contains('row'))r.remove()}}}}
+ applyApplicantFilters();
+}
+const __renderApplicantsIA=renderApplicants;
+renderApplicants=function(){__renderApplicantsIA();enhanceApplicantsInformationArchitecture()};
+</script>
 </body>
 </html>
 <style id="ux-quality-pass-oct02">
@@ -11308,3 +11427,45 @@ openPublishedJobSummary=function(jobId){
   assertScreenIntegrity();
 })();
 </script>
+
+<style id="oct04-section-title-marker-final">
+/* Final section-heading rule: same short orange marker in account creation and job-offer forms. */
+.onb-step-label,
+#detail-overlay .profile-scroll .onb-step-label{
+  position:relative!important;
+  margin-left:24px!important;
+  margin-right:24px!important;
+  padding-left:14px!important;
+  border-left:0!important;
+  box-sizing:border-box!important;
+}
+.onb-step-label::before,
+#detail-overlay .profile-scroll .onb-step-label::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  bottom:auto!important;
+  width:3px!important;
+  height:1em!important;
+  min-height:0!important;
+  max-height:none!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:var(--brand)!important;
+  transform:translateY(-50%)!important;
+  box-shadow:none!important;
+}
+.onb-step-label::after,
+#detail-overlay .profile-scroll .onb-step-label::after{
+  content:none!important;
+  display:none!important;
+}
+/* Job-offer overlay uses its own content gutter: keep text aligned with the controls. */
+#detail-overlay .profile-scroll .onb-step-label{
+  margin-left:0!important;
+  margin-right:0!important;
+  padding-left:14px!important;
+}
+</style>
