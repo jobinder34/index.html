@@ -11238,3 +11238,73 @@ openPublishedJobSummary=function(jobId){
   document.addEventListener('pointercancel',end,{passive:false});
 })();
 </script>
+
+<style id="oct04-global-screen-integrity-fix">
+/* Global screen integrity: headers never clip and closed overlays never leak into another view. */
+#phone{isolation:isolate!important;overflow:hidden!important}
+.app-header:not(.header-overlay){
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  transform:none!important;box-sizing:border-box!important;z-index:45!important;
+  min-height:76px!important;padding:28px 18px 12px!important;flex:0 0 auto!important;
+  background:var(--surface)!important;
+}
+#screens{min-height:0!important;overflow:hidden!important}
+#detail-overlay:not(.show),#ai-overlay:not(.show),#calendar-overlay:not(.show){
+  display:none!important;visibility:hidden!important;pointer-events:none!important;transform:none!important;
+}
+#detail-overlay.show,#ai-overlay.show,#calendar-overlay.show{
+  display:flex!important;visibility:visible!important;pointer-events:auto!important;transform:none!important;
+  inset:0!important;overflow:hidden!important;
+}
+/* Main screens own only their content area; they can never paint below the tab bar. */
+.screen{inset:0!important;min-height:0!important;overflow:hidden!important}
+.screen.active{visibility:visible!important}
+.screen:not(.active){visibility:hidden!important}
+#tabbar-wrap{position:relative!important;z-index:40!important;flex:0 0 auto!important;background:var(--surface)!important}
+@media (max-width:520px),(hover:none) and (pointer:coarse){
+  .app-header:not(.header-overlay){
+    min-height:calc(72px + env(safe-area-inset-top,0px))!important;
+    padding:calc(24px + env(safe-area-inset-top,0px)) 18px 10px!important;
+  }
+}
+</style>
+<script id="oct04-global-screen-integrity-script">
+/* Navigation invariant: entering any main screen closes transient layers first. */
+(function(){
+  const previousGoTo=goTo;
+  goTo=function(s){
+    ['detail-overlay','ai-overlay','calendar-overlay','menu-overlay','notif-overlay'].forEach(function(id){
+      const el=document.getElementById(id); if(el) el.classList.remove('show');
+    });
+    const h=document.querySelector('.app-header');
+    if(h && !['login','role-select','signup','onboarding'].includes(s)){
+      h.classList.remove('overlay-open','header-overlay','header-plain');
+      h.style.display='flex';
+    }
+    const result=previousGoTo(s);
+    /* Reassert the state after legacy renderers have run. */
+    if(h && !['login','role-select','signup','onboarding'].includes(s)){
+      h.classList.remove('overlay-open','header-overlay','header-plain');
+      h.style.display='flex';
+    }
+    return result;
+  };
+
+  /* Closed overlays must be structurally absent, not merely translated off-screen. */
+  const oldCloseCalendar=closeCalendar;
+  closeCalendar=function(){ oldCloseCalendar(); const el=document.getElementById('calendar-overlay'); if(el) el.classList.remove('show'); };
+  const oldCloseDetail=closeDetail;
+  closeDetail=function(){ oldCloseDetail(); const el=document.getElementById('detail-overlay'); if(el) el.classList.remove('show'); };
+
+  function assertScreenIntegrity(){
+    document.querySelectorAll('#detail-overlay,#ai-overlay,#calendar-overlay').forEach(function(el){
+      if(!el.classList.contains('show')) el.setAttribute('aria-hidden','true'); else el.removeAttribute('aria-hidden');
+    });
+    const active=document.querySelectorAll('#screens .screen.active');
+    if(active.length>1){ for(let i=1;i<active.length;i++) active[i].classList.remove('active'); }
+  }
+  document.addEventListener('click',function(){requestAnimationFrame(assertScreenIntegrity)},true);
+  window.addEventListener('resize',assertScreenIntegrity,{passive:true});
+  assertScreenIntegrity();
+})();
+</script>
