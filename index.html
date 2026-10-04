@@ -5108,7 +5108,7 @@ const CANDIDATES = [
 ];
 
 const COMPANY_PROFILE = {
-  name:"Nebula Labs", industry:"Software / SaaS", size:"51–200 people",
+  name:"Nebula Labs", address:"", industry:"Software / SaaS", size:"51–200 people",
   roles_hiring:["Frontend Engineer","Backend Engineer","Product Designer"],
   required_skills:["React","TypeScript","Go","Kubernetes"],
   salary_range:"€100k – €180k / yr", work_setup:"Remote-first, optional hybrid in Madrid",
@@ -5878,7 +5878,7 @@ function renderSignup() {
       <div style="flex:1"><label>Last name <span class="required-mark">*</span></label><input id="su-last-name" placeholder="Last name" oninput="signupData.last_name=this.value" /></div>
     </div>
     <div class="field-error" id="err-full-name"></div>
-    ${!isCandidate ? `<div class="field"><label>Role <span class="required-mark">*</span></label><input id="su-role" placeholder="e.g. Talent Acquisition Manager" oninput="signupData.recruiter_role=this.value" /><div class="field-error" id="err-role"></div></div><div class="field"><label>Company name <span class="required-mark">*</span></label><input id="su-company" placeholder="e.g. Nebula Labs" oninput="signupData.company_name=this.value" /><div class="field-error" id="err-company"></div></div>` : ''}
+    ${!isCandidate ? `<div class="field"><label>Role <span class="required-mark">*</span></label><input id="su-role" placeholder="e.g. Talent Acquisition Manager" oninput="signupData.recruiter_role=this.value" /><div class="field-error" id="err-role"></div></div><div class="field"><label>Company name <span class="required-mark">*</span></label><input id="su-company" placeholder="e.g. Nebula Labs" oninput="signupData.company_name=this.value" /><div class="field-error" id="err-company"></div></div><div class="field"><label>Company address <span class="required-mark">*</span></label><input id="su-company-address" placeholder="e.g. 24 Rue de Rivoli, Paris, France" autocomplete="street-address" oninput="signupData.company_address=this.value" /><div class="field-error" id="err-company-address"></div></div>` : ''}
     <div class="field"><label>Email <span class="required-mark">*</span></label><input id="su-email" placeholder="${isCandidate?'you@email.com':'you@yourcompany.com'}" oninput="signupData.email=this.value" /><div class="field-error" id="err-email"></div></div>
     ${isCandidate ? `<div style="font-size:11px;color:var(--muted);margin:6px 24px 14px;line-height:1.5">${icon('shield','icon-sm')} Please use a real email — you'll need to verify it to activate your account.</div>` : ''}
     ${!isCandidate ? `<div style="font-size:11px;color:var(--muted);margin:6px 24px 14px;line-height:1.5">${icon('shield','icon-sm')} We require a company email — no Gmail, Yahoo, Outlook, etc. — to keep talent safe from fake employers.</div>` : ''}
@@ -5896,7 +5896,7 @@ function isCorporateEmail(email) {
   return !!domain && !freeProviders.includes(domain);
 }
 function clearSignupErrors() {
-  ['full-name','email','password','role'].forEach(k => {
+  ['full-name','email','password','role','company-address'].forEach(k => {
     const err = document.getElementById('err-'+k);
     const field = err ? err.closest('.field') : null;
     if (err) err.textContent = '';
@@ -5930,6 +5930,7 @@ function finishSignup() {
   }
   if (!password || password.length < 8) { setSignupError('password', 'Password must be at least 8 characters'); firstErrorField = firstErrorField || 'su-password'; hasError = true; }
   if (!role) { setSignupError('role', isCandidate ? 'Tell us what role you\'re looking for' : 'Please enter your company name'); firstErrorField = firstErrorField || 'su-role'; hasError = true; }
+  if (!isCandidate && !(signupData.company_address || '').trim()) { setSignupError('company-address', 'Please enter your company address'); firstErrorField = firstErrorField || 'su-company-address'; hasError = true; }
 
   if (hasError) {
     showToast('Please fix the highlighted fields');
@@ -6407,12 +6408,13 @@ function currentDeck() {
     // default — it only shows up through "lower compatibility suggestions"
     // once the candidate has been through their real matches. The salary
     // gate is a real hard filter too, applied uniformly to every job.
-    const scored = JOBS.filter(j => !isGatedForCandidate(j))
-      .map(j => ({ job: j, score: computeMatchScore(j) }));
-    if (lowerCompatShown) {
-      return scored.filter(s => s.score < 60).sort((a, b) => b.score - a.score).map(s => s.job);
-    }
-    return scored.filter(s => s.score >= 60).sort((a, b) => b.score - a.score).map(s => s.job);
+    // Show every job to candidates, regardless of match percentage.
+    // Match remains a ranking signal, never a visibility gate: specific profiles
+    // should still have a complete catalogue to explore.
+    return JOBS
+      .map(j => ({ job: j, score: computeMatchScore(j) }))
+      .sort((a, b) => b.score - a.score)
+      .map(s => s.job);
   }
   if (freshRecruiterOnboarding) return [];
   // Same real matching, mirrored for the recruiter's Discover deck: only
@@ -7653,6 +7655,7 @@ function renderNewJobForm() {
 
       ${jobFormStepBody(d, jobFormStep)}
 
+      ${isEdit && !isLast ? `<button class="btn btn-brand btn-full edit-save-now" style="margin-top:24px" onclick="publishNewJob()">${icon('check')} Save changes now</button>` : ''}
       ${isLast ? `
         <button class="btn btn-full" style="margin-top:24px" onclick="jobFormStepError=''; const m=validateJobFormStep(); if(m.length){jobFormStepError='Please fill in '+m.join(', ')+' before publishing.'; renderNewJobForm(); document.querySelector('#detail-overlay .profile-scroll')?.scrollTo({top:0,behavior:'smooth'});} else { publishNewJob(); }">${icon('check')} ${isEdit ? 'Save changes' : 'Publish job post'}</button>
         ${isEdit ? `<button class="btn btn-outline btn-full" onclick="duplicateJobPost('${d.id}')">${icon('cardlist')} Duplicate this job post</button>` : ''}
@@ -9191,6 +9194,7 @@ function finishOnboarding() {
   } else {
     Object.assign(COMPANY_PROFILE, {
       name: onboardData.company_name || COMPANY_PROFILE.name,
+      address: onboardData.company_address || signupData.company_address || COMPANY_PROFILE.address || '',
       industry: onboardData.industry || COMPANY_PROFILE.industry,
       size: onboardData.company_size || COMPANY_PROFILE.size,
       roles_hiring: (onboardData.roles_hiring && onboardData.roles_hiring.length) ? onboardData.roles_hiring : COMPANY_PROFILE.roles_hiring,
@@ -9883,6 +9887,39 @@ function candidateProfileFieldsHTML(p, objName, rerenderFn) {
     <div class="field" style="padding:0;margin-top:20px"><label>Highlighted Projects</label>${projectsHTML(objName, p.projects, rerenderFn)}</div>
     <div class="field" style="padding:0;margin-top:20px"><label>CV</label><div class="cv-row">${icon('file')}<span class="cv-filename-link" onclick="openOwnCvPreview('${objName}')">${p.cv_filename}</span><a href="#" onclick="event.preventDefault(); showToast('Replace CV — re-analyzed with AI')">Replace</a></div></div>`;
 }
+function companyWorkSetupValues() {
+  const raw = COMPANY_PROFILE.work_setup;
+  if (Array.isArray(raw)) return raw;
+  const text = String(raw || '');
+  const vals = [];
+  if (/remote/i.test(text)) vals.push('Remote-first');
+  if (/hybrid/i.test(text)) vals.push('Hybrid');
+  if (/on[- ]?site/i.test(text)) vals.push('On-site');
+  if (/depends/i.test(text)) vals.push('Depends on the role');
+  return vals.length ? [...new Set(vals)] : [];
+}
+function toggleCompanyWorkSetupMenu(e) {
+  e.stopPropagation();
+  const root = document.getElementById('company-work-setup-select');
+  if (!root) return;
+  root.classList.toggle('open');
+}
+function toggleCompanyWorkSetupOption(value) {
+  const vals = companyWorkSetupValues();
+  const next = vals.includes(value) ? vals.filter(v => v !== value) : [...vals, value];
+  COMPANY_PROFILE.work_setup = next;
+  renderProfile();
+  requestAnimationFrame(() => document.getElementById('company-work-setup-select')?.classList.add('open'));
+}
+function companyWorkSetupSelectHTML() {
+  const opts = ['Remote-first','Hybrid','On-site','Depends on the role'];
+  const vals = companyWorkSetupValues();
+  const label = vals.length ? vals.join(', ') : 'Select work setup';
+  return `<div class="company-multiselect" id="company-work-setup-select">
+    <button type="button" class="company-multiselect-trigger" onclick="toggleCompanyWorkSetupMenu(event)" aria-label="Work setup"><span>${label}</span>${icon('back')}</button>
+    <div class="company-multiselect-menu">${opts.map(o=>`<button type="button" class="company-multiselect-option ${vals.includes(o)?'selected':''}" onclick="event.stopPropagation();toggleCompanyWorkSetupOption('${o.replace(/'/g,"\\'")}')"><span class="company-check">${vals.includes(o)?icon('check'):''}</span><span>${o}</span></button>`).join('')}</div>
+  </div>`;
+}
 function renderProfile() {
   const el = document.getElementById('screen-profile');
   const prevScroll = el.querySelector('.profile-scroll');
@@ -9905,11 +9942,12 @@ function renderProfile() {
         <div class="ai-note">${icon('sparkle')}<div>This is the info you filled in during company onboarding. You can edit it whenever you like.</div></div>
         <div class="company-hero"><div class="company-logo">${icon('camera')}</div><div><div class="profile-name">${c.name}</div><div class="profile-headline">${c.industry}</div></div></div>
         <div class="field" style="padding:0"><label>Company name</label><input value="${c.name}" oninput="COMPANY_PROFILE.name=this.value" /></div>
+        <div class="field" style="padding:0;margin-top:20px"><label>Company address</label><input placeholder="Street, city, postal code, country" value="${c.address||''}" oninput="COMPANY_PROFILE.address=this.value" /></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Company website</label><input placeholder="https://yourcompany.com" value="${c.website||''}" oninput="COMPANY_PROFILE.website=this.value" /><div class="website-help">Helps us give candidates useful context about your company and the opportunity.</div></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Industry</label><input value="${c.industry}" oninput="COMPANY_PROFILE.industry=this.value" /></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Size</label><input value="${c.size}" /></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Salary range</label><input value="${c.salary_range}" /></div>
-        <div class="field" style="padding:0;margin-top:20px"><label>Work setup</label><input value="${c.work_setup}" /></div>
+        <div class="field" style="padding:0;margin-top:20px"><label>Work setup</label>${companyWorkSetupSelectHTML()}<div class="website-help">Select or unselect every setup your company supports.</div></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Response deadline (SLA)</label><div class="chip-row">${[7,10,14,21].map(n=>`<span class="chip ${Number(c.sla_days)===n?'on':''}" onclick="COMPANY_PROFILE.sla_days=${n};renderProfile()">${n} days</span>`).join('')}</div></div>
         <div class="field" style="padding:0;margin-top:20px"><label>Roles you're hiring for</label>${editableChipRow('COMPANY_PROFILE', 'roles_hiring', c.roles_hiring, 'renderProfile', 'Add a role…')}</div>
         <div class="field" style="padding:0;margin-top:20px"><label>Required skills</label>${editableChipRow('COMPANY_PROFILE', 'required_skills', c.required_skills, 'renderProfile', 'Add a skill…')}</div>
@@ -11468,4 +11506,41 @@ openPublishedJobSummary=function(jobId){
   margin-right:0!important;
   padding-left:14px!important;
 }
+</style>
+<style id="oct04-auth-scroll-regression-fix">
+/* Auth/onboarding screens are intentionally scrollable. The global screen-integrity
+   rule must not trap long forms inside the viewport. */
+#screen-signup,
+#screen-onboarding {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+  scroll-padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#screen-signup.active,
+#screen-onboarding.active {
+  min-height: 0 !important;
+}
+#screen-signup > :last-child,
+#screen-onboarding > :last-child {
+  margin-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+  /* Company profile: real multi-select dropdown for work setup */
+  .company-multiselect{position:relative;width:100%}
+  .company-multiselect-trigger{width:100%;min-height:52px;border:1px solid var(--border);background:var(--raised);color:var(--on-surface);border-radius:16px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;font:inherit;cursor:pointer}
+  .company-multiselect-trigger span{min-width:0;white-space:normal;line-height:1.35}
+  .company-multiselect-trigger .icon{width:18px;height:18px;transform:rotate(-90deg);flex:0 0 auto;transition:transform .18s ease}
+  .company-multiselect.open .company-multiselect-trigger .icon{transform:rotate(90deg)}
+  .company-multiselect-menu{display:none;margin-top:8px;padding:6px;background:var(--raised);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.10)}
+  .company-multiselect.open .company-multiselect-menu{display:block}
+  .company-multiselect-option{width:100%;border:0;background:transparent;color:var(--on-surface);padding:11px 10px;border-radius:11px;display:flex;align-items:center;gap:10px;text-align:left;font:inherit;cursor:pointer}
+  .company-multiselect-option:hover,.company-multiselect-option.selected{background:var(--surface-2)}
+  .company-check{width:22px;height:22px;border:1px solid var(--border);border-radius:7px;display:grid;place-items:center;flex:0 0 auto}
+  .company-multiselect-option.selected .company-check{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+  .company-check .icon{width:13px;height:13px}
+  .edit-save-now{position:sticky;bottom:8px;z-index:3;box-shadow:0 8px 24px rgba(0,0,0,.14)}
 </style>
