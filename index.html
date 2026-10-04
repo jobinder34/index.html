@@ -7820,7 +7820,35 @@ function downloadCandidateCvPdf(name) {
     .chip { border: 1px solid #ccc; border-radius: 999px; padding: 3px 10px; font-size: 12px; }
     .match-note { display: none; }
     button { display: none; }
-  </style></head><body>${doc.innerHTML}
+  </style>
+<style id="oct04-section-marker-hard-fix">
+/* Hard reset: older logo-mask rules were still clipping the orange section marker. */
+.onb-step-label::before,
+#detail-overlay .profile-scroll .onb-step-label::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  width:3px!important;
+  height:1em!important;
+  min-width:3px!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:var(--brand)!important;
+  background-image:none!important;
+  -webkit-mask:none!important;
+  mask:none!important;
+  clip-path:none!important;
+  transform:translateY(-50%)!important;
+  box-shadow:none!important;
+  opacity:1!important;
+}
+</style>
+</head><body>${doc.innerHTML}
 
 
 
